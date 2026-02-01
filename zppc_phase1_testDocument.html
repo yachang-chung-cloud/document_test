@@ -3,39 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>載入中... | Aiii.Ai</title>
+  <title>驗證中... | Aiii.Ai</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    :root { --aiii-deep-blue: #004B85; --aiii-cyan: #0099CC; --action-teal: #1796B0; --gradient-bg: linear-gradient(180deg, #4BC6E6 0%, #00639B 100%); }
-    body { margin: 0; font-family: 'Roboto', 'Noto Sans TC', sans-serif; }
-    #auth-shell { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--gradient-bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-    .auth-box { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 75, 133, 0.15); text-align: center; max-width: 400px; width: 90%; box-sizing: border-box; }
-    .auth-logo { width: 120px; margin-bottom: 24px; }
-    .auth-title { font-weight: 500; color: var(--aiii-deep-blue); font-size: 1.5rem; margin-bottom: 8px; }
-    .auth-p { font-size: 14px; color: #666; margin-bottom: 24px; line-height: 1.5; }
-    .auth-input { width: 100%; padding: 12px 16px; margin-bottom: 15px; border: 1px solid #DDD; border-radius: 8px; font-size: 1rem; text-align: center; box-sizing: border-box; }
-    .auth-btn { width: 100%; padding: 12px; background-color: var(--action-teal); color: #fff; border: none; border-radius: 50px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: 0.2s; }
-    .auth-msg { margin-top: 15px; font-size: 0.9rem; min-height: 1.2em; color: #666; }
-    .auth-msg.error { color: #d32f2f; }
+    :root { --aiii-blue: #004B85; --aiii-teal: #1796B0; --gradient-bg: linear-gradient(180deg, #4BC6E6 0%, #00639B 100%); }
+    body { margin: 0; font-family: 'Roboto', 'Noto Sans TC', sans-serif; background: var(--gradient-bg); height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .auth-box { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; overflow: hidden; }
+    .auth-header { background: var(--aiii-blue); padding: 25px; text-align: center; }
+    .auth-header img { height: 40px; }
+    .auth-body { padding: 30px; text-align: center; }
+    .auth-title { font-weight: 500; color: var(--aiii-blue); font-size: 1.4rem; margin-bottom: 10px; }
+    .auth-input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; text-align: center; font-size: 1.1rem; letter-spacing: 2px; }
+    .auth-btn { width: 100%; padding: 12px; background: var(--aiii-teal); color: #fff; border: none; border-radius: 50px; font-size: 16px; cursor: pointer; font-weight: bold; }
+    #content-root { display: none; background: #fff; min-height: 100vh; width: 100%; }
   </style>
 </head>
 <body>
   <div id="auth-shell">
     <div class="auth-box">
-      <img src="https://storage.googleapis.com/aiii-storage-public/aiii/Aiii_logo-02.png" alt="Aiii Logo" class="auth-logo">
-      <div class="auth-title" id="page-title">受保護的文件</div>
-      <div id="lock-ui" style="display:none;">
-        <p class="auth-p">請輸入驗證碼以解鎖文件內容。</p>
-        <input type="password" id="access-code" class="auth-input" placeholder="ACCESS CODE" />
-        <button id="btn-verify" class="auth-btn" onclick="verifyCode()">解鎖文件</button>
-        <div id="auth-msg" class="auth-msg"></div>
+      <div class="auth-header"><img src="https:
+      <div class="auth-body">
+        <div class="auth-title" id="page-title">正在載入...</div>
+        <div id="lock-ui" style="display:none;">
+          <p style="color: #666; font-size: 14px;">此文件受保護，請輸入驗證碼。</p>
+          <input type="password" id="access-code" class="auth-input" placeholder="ACCESS CODE">
+          <button class="auth-btn" onclick="verifyCode()">解鎖文件</button>
+          <p id="err-msg" style="color:red; font-size: 12px; margin-top: 10px;"></p>
+        </div>
       </div>
-      <div id="loading-ui"><p class="auth-p">正在確認文件權限...</p></div>
     </div>
   </div>
-
   <div id="content-root"></div>
-
   <template id="secure-content">
     <style>
     /* --- Branding Variables --- */
@@ -586,7 +584,7 @@
         btn.className = 'scenario-btn';
         if(index === 0) btn.classList.add('active');
         // title already includes en-sub span
-        btn.innerHTML = `<span class="code">情境 ${s.id}</span>${s.title}`;
+        btn.innerHTML = \`<span class="code">情境 \${s.id}</span>\${s.title}\`;
         btn.onclick = () => {
           // Remove active class from all
           document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
@@ -605,127 +603,108 @@
       const container = document.getElementById('scenario-content');
       
       // 生成步驟列表 HTML
-      const stepsHtml = s.steps.map(step => `<li>${step}</li>`).join('');
+      const stepsHtml = s.steps.map(step => \`<li>\${step}</li>\`).join('');
 
       // 影片區塊邏輯
       let videoHtml = '';
       if (s.videoUrl) {
         // 判斷是否為直接檔案連結
         if (s.videoUrl.includes('storage.googleapis.com') || s.videoUrl.endsWith('.mp4') || s.videoUrl.endsWith('.mov')) {
-            videoHtml = `
+            videoHtml = \`
               <video controls autoplay muted playsinline>
-                <source src="${s.videoUrl}" type="video/mp4">
-                <source src="${s.videoUrl}" type="video/quicktime">
-                您的瀏覽器不支援此影片標籤，請嘗試下載播放：<a href="${s.videoUrl}">下載影片</a><br>
-                <span class="en-sub">Browser doesn't support video tag. <a href="${s.videoUrl}">Download Video</a></span>
-              </video>`;
+                <source src="\${s.videoUrl}" type="video/mp4">
+                <source src="\${s.videoUrl}" type="video/quicktime">
+                您的瀏覽器不支援此影片標籤，請嘗試下載播放：<a href="\${s.videoUrl}">下載影片</a><br>
+                <span class="en-sub">Browser doesn't support video tag. <a href="\${s.videoUrl}">Download Video</a></span>
+              </video>\`;
         } else {
             // iframe
-            videoHtml = `
+            videoHtml = \`
               <iframe 
-                src="${s.videoUrl}" 
+                src="\${s.videoUrl}" 
                 width="100%" 
                 height="100%" 
                 style="border:none; min-height:400px;" 
                 allow="autoplay; fullscreen">
-              </iframe>`;
+              </iframe>\`;
         }
       } else {
         // 無影片時的佔位符
-        videoHtml = `
+        videoHtml = \`
           <div style="text-align:center;">
             <div style="font-size:3rem; opacity:0.5; margin-bottom:10px;">🎥</div>
             <div>
               <strong>待補上螢幕錄影</strong><br>
               <span class="en-sub">Screen recording pending</span><br>
-              ${s.title}
+              \${s.title}
             </div>
-          </div>`;
+          </div>\`;
       }
 
       // 生成警語 HTML (若有)
       let warningHtml = '';
       if (s.warning) {
-        warningHtml = `
+        warningHtml = \`
           <div class="warning-box">
             <div style="font-size: 1.2rem;">⚠️</div>
             <div>
-              <strong>Demo 系統提示：</strong>${s.warning}
+              <strong>Demo 系統提示：</strong>\${s.warning}
             </div>
-          </div>`;
+          </div>\`;
       }
 
-      container.innerHTML = `
+      container.innerHTML = \`
         <div class="scenario-header">
-          <div style="color: var(--accent-teal); font-weight:bold; margin-bottom:5px;">情境 ${s.id} (Scenario ${s.id})</div>
-          <h3>${s.title}</h3>
-          <p style="color:#666;">${s.desc}</p>
+          <div style="color: var(--accent-teal); font-weight:bold; margin-bottom:5px;">情境 \${s.id} (Scenario \${s.id})</div>
+          <h3>\${s.title}</h3>
+          <p style="color:#666;">\${s.desc}</p>
         </div>
         
-        ${warningHtml}
+        \${warningHtml}
 
         <ul class="step-list">
-          ${stepsHtml}
+          \${stepsHtml}
         </ul>
 
-        <div class="video-container" style="${s.videoUrl ? 'background:black;' : 'background:var(--ivory);'}">
-          ${videoHtml}
+        <div class="video-container" style="\${s.videoUrl ? 'background:black;' : 'background:var(--ivory);'}">
+          \${videoHtml}
         </div>
-      `;
+      \`;
     }
   
-      // 自動觸發初始化 (適用於包含 initScenarioMenu 的腳本)
       if (typeof initScenarioMenu === 'function') initScenarioMenu();
       if (typeof loadScenario === 'function') loadScenario(0);
     </script>
   </template>
-
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxlFcznIZz98m7lkqo8l5_lDenFTNJi-hQSxQEXFkiIo3s5uFOCIcFsjCNjUKDKbqaOZg/exec";
-    const DOC_KEY = "zppc_phase1_testDocument";
-
-    window.onload = function() {
-        fetch(GAS_URL + "?key=" + DOC_KEY)
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('loading-ui').style.display = 'none';
-                if (data.status === 'success') {
-                    unlockContent(data.title);
-                } else {
-                    document.getElementById('page-title').innerText = data.title;
-                    document.getElementById('lock-ui').style.display = 'block';
-                }
-            });
-    };
-
-    function verifyCode() {
-        const code = document.getElementById('access-code').value.trim();
-        fetch(GAS_URL + "?key=" + DOC_KEY + "&code=" + code)
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    unlockContent(data.title);
-                } else {
-                    document.getElementById('auth-msg').innerText = "驗證碼錯誤";
-                    document.getElementById('auth-msg').classList.add('error');
-                }
-            });
-    }
-
-    function unlockContent(title) {
-        document.title = title + ' | Aiii.Ai';
-        const template = document.getElementById('secure-content');
+    const KEY = "zppc_phase1_testDocument.html";
+    function reveal(title) {
+        document.title = title + " | Aiii.Ai";
         const root = document.getElementById('content-root');
-        const clone = document.importNode(template.content, true);
-        root.appendChild(clone);
+        root.appendChild(document.importNode(document.getElementById('secure-content').content, true));
+        root.style.display = 'block';
         document.getElementById('auth-shell').style.display = 'none';
-        
-        // 執行注入的 script
+        document.body.style.background = '#ffffff';
+        document.body.style.height = 'auto';
+        document.body.style.display = 'block';
         const scripts = root.getElementsByTagName("script");
-        for (let i = 0; i < scripts.length; i++) {
-            eval(scripts[i].innerText);
-        }
+        for (let i = 0; i < scripts.length; i++) { try { eval(scripts[i].innerText); } catch(e){ console.error(e); } }
     }
+    window.onload = function() {
+        fetch(GAS_URL + "?key=" + KEY).then(res => res.json()).then(data => {
+            if (data.status === 'success') reveal(data.title);
+            else { document.getElementById('page-title').innerText = data.title; document.getElementById('lock-ui').style.display = 'block'; }
+        });
+    };
+    function verifyCode() {
+        const code = document.getElementById('access-code').value;
+        fetch(GAS_URL + "?key=" + KEY + "&code=" + code).then(res => res.json()).then(data => {
+            if (data.status === 'success') reveal(data.title);
+            else document.getElementById('err-msg').innerText = "驗證碼錯誤";
+        });
+    }
+    document.getElementById('access-code').onkeypress = function(e){ if(e.keyCode==13) verifyCode(); };
   </script>
 </body>
 </html>
