@@ -1,222 +1,731 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>載入中... | Aiii.Ai</title>
-  <!-- Aiii Brand Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
-  
   <style>
-    /* Aiii Brand Guideline Styles */
-    :root {
-      --aiii-deep-blue: #004B85;
-      --aiii-cyan: #0099CC;
-      --action-teal: #1796B0;
-      --text-black: #1A1A1A;
-      --pure-white: #FFFFFF;
-      --gradient-bg: linear-gradient(180deg, #4BC6E6 0%, #00639B 100%);
-    }
-    body { 
-      margin: 0; 
-      font-family: 'Roboto', 'Noto Sans TC', sans-serif; 
-      background: var(--gradient-bg); 
-      min-height: 100vh; 
-      display: flex; 
-      flex-direction: column;
-    }
-    
-    /* 驗證遮罩 */
-    #auth-container { 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      background: var(--gradient-bg); 
-      z-index: 9999; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      flex-direction: column; 
-    }
-    .auth-box { 
-      background: rgba(255, 255, 255, 0.9); /* 玻璃擬態 */
-      backdrop-filter: blur(10px);
-      padding: 40px; 
-      border-radius: 12px; 
-      box-shadow: 0 4px 12px rgba(0, 75, 133, 0.15);
-      text-align: center; 
-      max-width: 400px; 
-      width: 90%;
-      box-sizing: border-box;
-    }
+    :root { --aiii-deep-blue: #004B85; --aiii-cyan: #0099CC; --action-teal: #1796B0; --gradient-bg: linear-gradient(180deg, #4BC6E6 0%, #00639B 100%); }
+    body { margin: 0; font-family: 'Roboto', 'Noto Sans TC', sans-serif; }
+    #auth-shell { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--gradient-bg); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+    .auth-box { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 75, 133, 0.15); text-align: center; max-width: 400px; width: 90%; box-sizing: border-box; }
     .auth-logo { width: 120px; margin-bottom: 24px; }
-    .auth-title { font-family: 'Roboto', 'Noto Sans TC', sans-serif; font-weight: 500; color: var(--aiii-deep-blue); font-size: 1.5rem; margin-bottom: 8px; }
+    .auth-title { font-weight: 500; color: var(--aiii-deep-blue); font-size: 1.5rem; margin-bottom: 8px; }
     .auth-p { font-size: 14px; color: #666; margin-bottom: 24px; line-height: 1.5; }
     .auth-input { width: 100%; padding: 12px 16px; margin-bottom: 15px; border: 1px solid #DDD; border-radius: 8px; font-size: 1rem; text-align: center; box-sizing: border-box; }
-    .auth-input:focus { border-color: var(--aiii-cyan); outline: none; }
-    .auth-btn { width: 100%; padding: 12px; background-color: var(--action-teal); color: var(--pure-white); border: none; border-radius: 50px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s, transform 0.1s; }
-    .auth-btn:hover { background-color: #138299; }
-    .auth-btn:active { transform: scale(0.98); }
+    .auth-btn { width: 100%; padding: 12px; background-color: var(--action-teal); color: #fff; border: none; border-radius: 50px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: 0.2s; }
     .auth-msg { margin-top: 15px; font-size: 0.9rem; min-height: 1.2em; color: #666; }
     .auth-msg.error { color: #d32f2f; }
-    .auth-msg.success { color: #2e7d32; }
-    
-    #app-root { width: 100%; min-height:100vh; display: none; background: #fff;}
-    
-    .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; margin-right: 8px; vertical-align: middle; display: none; }
-    @keyframes spin { to { transform: rotate(3D, 1, 1, 1, 360deg); } }
   </style>
 </head>
 <body>
-
-  <div id="auth-container">
+  <div id="auth-shell">
     <div class="auth-box">
-      <!-- Logo 使用 Brand Guide 中的企業色版 -->
       <img src="https://storage.googleapis.com/aiii-storage-public/aiii/Aiii_logo-02.png" alt="Aiii Logo" class="auth-logo">
       <div class="auth-title" id="page-title">受保護的文件</div>
-      
       <div id="lock-ui" style="display:none;">
-        <p class="auth-p">此文件受密碼保護，請輸入驗證碼以繼續。</p>
+        <p class="auth-p">請輸入驗證碼以解鎖文件內容。</p>
         <input type="password" id="access-code" class="auth-input" placeholder="ACCESS CODE" />
-        <button id="btn-verify" class="auth-btn" onclick="verifyCode()">
-          <span class="spinner" id="btn-spinner"></span><span id="btn-text">解鎖文件</span>
-        </button>
+        <button id="btn-verify" class="auth-btn" onclick="verifyCode()">解鎖文件</button>
         <div id="auth-msg" class="auth-msg"></div>
       </div>
-
-      <div id="loading-ui">
-        <p class="auth-p">正在確認文件權限...</p>
-      </div>
+      <div id="loading-ui"><p class="auth-p">正在確認文件權限...</p></div>
     </div>
   </div>
 
-  <div id="app-root"></div>
+  <div id="content-root"></div>
+
+  <template id="secure-content">
+    <style>
+    /* --- Branding Variables --- */
+    :root {
+      --sky: #AEE0E8;
+      --pale-green: #D9ECD2;
+      --light-green: #E4F2E7;
+      --ivory: #F5FAF2;
+      --dark-teal: #204D4C;
+      --accent-teal: #51A099;
+      --black: #000000;
+      --white: #FFFFFF;
+      --warning-bg: #fff8e1; /* 柔和的黃色背景用於警示 */
+      --warning-border: #ffe082;
+      
+      --gradient-main: linear-gradient(45deg, var(--sky), var(--light-green));
+      --gradient-hover: linear-gradient(45deg, var(--pale-green), var(--ivory));
+
+      --font-header: 'Work Sans', 'Noto Sans TC', sans-serif;
+      --font-body: 'Work Sans', 'Noto Sans TC', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-body);
+      background-color: var(--ivory);
+      color: var(--black);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Helper class for English text styling */
+    .en-sub {
+      display: block;
+      font-size: 0.85em;
+      opacity: 0.85;
+      font-weight: 400;
+      margin-top: 4px;
+      line-height: 1.3;
+      pointer-events: none; /* 讓點擊事件穿透文字，直接作用在按鈕上 (額外保險) */
+    }
+
+    /* --- Header --- */
+    .header {
+      background: var(--white);
+      padding: 15px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid var(--pale-green);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      flex-shrink: 0;
+    }
+
+    .logo img {
+      height: 40px;
+    }
+
+    .header-title {
+      font-family: var(--font-header);
+      color: var(--dark-teal);
+      font-weight: 700;
+      font-size: 1.2rem;
+      text-align: right;
+    }
+
+    /* --- Main Layout --- */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* --- Sidebar (Main Tabs) --- */
+    .sidebar {
+      width: 250px;
+      background-color: var(--dark-teal);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0;
+      flex-shrink: 0;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--white);
+      padding: 15px 25px;
+      text-align: left;
+      font-family: var(--font-header);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+      opacity: 0.7;
+      width: 100%; /* 確保按鈕填滿寬度 */
+    }
+
+    .nav-btn:hover {
+      background-color: rgba(255,255,255,0.1);
+      opacity: 1;
+    }
+
+    .nav-btn.active {
+      background-color: rgba(255,255,255,0.15);
+      border-left: 4px solid var(--sky);
+      opacity: 1;
+      font-weight: bold;
+    }
+
+    /* --- Content Area --- */
+    .content-area {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+      background-color: var(--ivory);
+    }
+
+    /* --- Section: Intro --- */
+    .intro-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(32, 77, 76, 0.08);
+      border-top: 5px solid var(--sky);
+    }
+
+    h2 {
+      font-family: var(--font-header);
+      color: var(--dark-teal);
+      margin-top: 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--pale-green);
+    }
+
+    .login-box {
+      background: var(--light-green);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 15px 0;
+      color: var(--dark-teal);
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+    
+    li {
+      margin-bottom: 8px;
+    }
+
+    /* --- Section: Scenarios Layout --- */
+    .scenario-wrapper {
+      display: flex;
+      gap: 20px;
+      height: 100%;
+    }
+
+    /* Scenario Navigation (Inner Sidebar) */
+    .scenario-nav {
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 10px;
+      overflow-y: auto;
+    }
+
+    .scenario-btn {
+      background: var(--white);
+      border: 1px solid var(--pale-green);
+      padding: 15px;
+      border-radius: 8px;
+      text-align: left;
+      cursor: pointer;
+      transition: 0.3s;
+      position: relative;
+    }
+
+    .scenario-btn:hover {
+      border-color: var(--dark-teal);
+      transform: translateX(5px);
+    }
+
+    .scenario-btn.active {
+      background: var(--gradient-main);
+      border-color: transparent;
+      color: var(--dark-teal);
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .scenario-btn .code {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Scenario Detail */
+    .scenario-detail {
+      flex: 1;
+      background: var(--white);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 15px rgba(32, 77, 76, 0.08);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .scenario-header {
+      margin-bottom: 10px;
+    }
+    
+    .scenario-header h3 {
+      font-family: var(--font-header);
+      color: var(--dark-teal);
+      font-size: 1.8rem;
+      margin: 0 0 10px 0;
+    }
+
+    /* Warning Box */
+    .warning-box {
+      background-color: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: #b36b00;
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: start;
+      gap: 10px;
+    }
+    .warning-box strong {
+      color: #9c5b00;
+    }
+
+    .step-list {
+      counter-reset: step;
+      list-style: none;
+      padding: 0;
+      margin-bottom: 30px;
+    }
+
+    .step-list li {
+      position: relative;
+      padding-left: 40px;
+      margin-bottom: 12px;
+      color: var(--black);
+    }
+
+    .step-list li::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 2px;
+      width: 24px;
+      height: 24px;
+      background-color: var(--sky);
+      color: var(--dark-teal);
+      border-radius: 50%;
+      text-align: center;
+      line-height: 24px;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+
+    /* Video Container */
+    .video-container {
+      margin-top: auto;
+      background-color: var(--black);
+      border-radius: 10px;
+      min-height: 300px; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    video {
+      max-width: 100%;
+      max-height: 60vh; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    /* Utility */
+    .hidden { display: none !important; }
+
+    /* RWD */
+    @media (max-width: 768px) {
+      .main-container { flex-direction: column; overflow-y: auto;}
+      .sidebar { width: 100%; flex-direction: row; padding: 0; overflow-x: auto;}
+      .nav-btn { flex: 1; text-align: center; padding: 10px; white-space: nowrap; border-left: none; border-bottom: 4px solid transparent; }
+      .nav-btn.active { border-left: none; border-bottom: 4px solid var(--sky); }
+      
+      .scenario-wrapper { flex-direction: column; }
+      .scenario-nav { width: 100%; max-height: 150px; }
+      .content-area { padding: 15px; }
+    }
+  </style>
+    <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <img src="https://storage.googleapis.com/aiii-storage-public/zpt/ZPH01.Logo.POS.png" alt="Logo">
+    </div>
+    <div class="header-title">
+      測試操作手冊 Beta
+      <span class="en-sub" style="text-align: right;">Testing Manual Beta</span>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+      <!-- 修正：加入 this 參數傳遞 -->
+      <button class="nav-btn active" onclick="switchMainTab('instructions', this)">
+        1. 測試說明
+        <span class="en-sub">Test Instructions</span>
+      </button>
+      <button class="nav-btn" onclick="switchMainTab('scenarios', this)">
+        2. 測試情境
+        <span class="en-sub">Test Scenarios</span>
+      </button>
+    </nav>
+
+    <!-- Content Area -->
+    <main class="content-area">
+      
+      <!-- Tab 1: 測試說明 -->
+      <div id="tab-instructions" class="intro-container">
+        <div class="card">
+          <h2>
+            測試連結與登入
+            <span class="en-sub">Test Link & Login</span>
+          </h2>
+          <p>
+            歡迎使用 PC+ Outreach 管理平台 Beta 版，請使用以下資訊登入：<br>
+            <span class="en-sub">Welcome to PC+ Outreach Management Platform Beta. Please use the following info to log in:</span>
+          </p>
+          
+          <div class="login-box">
+            <strong>測試連結：</strong> <span style="font-size:0.9em">(Test Link)</span><br>
+            <a href="https://studio--zp-outreach-module-81529-b8a40.us-central1.hosted.app/login" target="_blank" style="color: #204D4C; font-weight: bold;">
+              點擊前往測試環境<br>
+              <span style="font-weight:normal; font-size:0.9em;">Click to visit Test Environment</span>
+            </a><br><br>
+            <strong>主管帳號資訊：</strong> <span style="font-size:0.9em">(Supervisor Account Info)</span><br>
+            • 手機號碼 (Mobile)：<code>0911111111</code><br>
+            • OTP驗證碼 (OTP)：<code>123456</code><br>
+            • 密碼 (Password)：<code>123456</code>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>
+            測試重點與注意事項
+            <span class="en-sub">Testing Focus & Notices</span>
+          </h2>
+          <ul>
+            <li>
+              <strong>情境操作：</strong>請切換至「測試情境」分頁，依序完成 A~F 的操作流程。<br>
+              <span class="en-sub"><strong>Scenario Ops:</strong> Please switch to the "Test Scenarios" tab and complete steps A~F in order.</span>
+            </li>
+            <li>
+              <strong>反饋方式：</strong>若有任何建議，請於 <strong>01/23（五）會議</strong> 上提出，或在 LINE 群組留言，團隊將透過 AI 進行收整。<br>
+              <span class="en-sub"><strong>Feedback:</strong> Please provide suggestions in the meeting on 01/23 (Fri) or leave a message in the LINE group.</span>
+            </li>
+            <li>
+              <strong>手機測試：</strong>平台支援 RWD，請務必協助測試手機介面的操作體驗。<br>
+              <span class="en-sub"><strong>Mobile Test:</strong> The platform supports RWD; please verify the mobile interface experience.</span>
+            </li>
+            <li>
+              <strong>補充說明：</strong>
+              <span class="en-sub" style="display:inline;">(Supplementary Notes)</span>
+              <ul>
+                <li>初次登入 Dashboard 讀取 Demo 資料約需 3-5 秒，請耐心等候。<br><span class="en-sub">Wait 3-5s for Demo data to load upon first login.</span></li>
+                <li>若流程卡住，建議重新整理頁面或重新登入。<br><span class="en-sub">If stuck, please refresh the page or re-login.</span></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Tab 2: 測試情境 (包含二級導航) -->
+      <div id="tab-scenarios" class="scenario-wrapper hidden">
+        
+        <!-- 左側情境選單 -->
+        <div class="scenario-nav" id="scenario-menu">
+          <!-- JS 將動態生成按鈕 -->
+        </div>
+
+        <!-- 右側情境內容 -->
+        <div class="scenario-detail">
+          <div id="scenario-content">
+            <!-- JS 將動態填入內容 -->
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+    <script>
+      
+    // --- Data: 測試情境資料 (包含中英文翻譯) ---
+    const scenarios = [
+      {
+        id: 'A',
+        title: '新病患收案與建檔<span class="en-sub">New Patient Enrollment</span>',
+        desc: '模擬個管師在現場或收到資料後，將新病患資料輸入系統。<br><span class="en-sub">Simulate a Case Manager entering new patient data into the system upon receiving it.</span>',
+        steps: [
+          '點擊左側選單「病患管理」。<br><span class="en-sub">Click "Patient Management" on the left menu.</span>',
+          '點擊右上角「新增病患」按鈕。<br><span class="en-sub">Click the "Add Patient" button on the top right.</span>',
+          '填寫資料：選擇專案 (如：舒力妥)、醫師 (系統自動過濾)、輸入姓名/手機/性別、選擇收案日期。<br><span class="en-sub">Fill in data: Select Project, Doctor, Name/Mobile/Gender, and Enrollment Date.</span>',
+          '點擊虛線區塊「上傳同意書」 (測試用可選任意圖片或PDF)。<br><span class="en-sub">Click "Upload Consent Form" (Select any image/PDF for testing).</span>',
+          '點擊「確定新增」。<br><span class="en-sub">Click "Confirm Add".</span>',
+          '確認列表出現新病患，狀態顯示為「審核中」。<br><span class="en-sub">Verify the new patient appears in the list with status "Under Review".</span>'
+        ],
+        videoUrl: 'https://storage.googleapis.com/aiii-storage-public/Jo/pcplus_demo_a.mov',
+        warning: '目前串接 Demo 資料庫，點擊「確定新增」後系統需約 1-3 秒寫入資料，請耐心等候，勿重複點擊。<br><span class="en-sub">Connected to Demo DB. System needs 1-3s to write data after clicking confirm. Please wait.</span>'
+      },
+      {
+        id: 'B',
+        title: '規劃病患的治療計畫<span class="en-sub">Treatment Plan Planning</span>',
+        desc: '針對已收案病患，排定未來的治療或關懷計畫 (Plan)。<br><span class="en-sub">Schedule future treatment or care plans for enrolled patients.</span>',
+        steps: [
+          '在「病患管理」列表點擊任一病患進入內頁。<br><span class="en-sub">Click any patient in the list to view details.</span>',
+          '切換至「Plan」分頁，點擊「新增 Plan」。<br><span class="en-sub">Switch to "Plan" tab and click "Add Plan".</span>',
+          '確認表單已自動帶入專案與病患姓名。<br><span class="en-sub">Verify project and patient name are auto-filled.</span>',
+          '選擇類型 (如：施打提醒)，並設定預計日期。<br><span class="en-sub">Select Type (e.g., Injection Reminder) and set Expected Date.</span>',
+          '(選用) 勾選「開啟批次建立」，設定重複週期 (如：每週一次，重複 3 次)。<br><span class="en-sub">(Optional) Check "Batch Create" and set cycle (e.g., Weekly, 3 times).</span>',
+          '點擊「確認新增」，並確認列表資料更新。<br><span class="en-sub">Click "Confirm Add" and verify the list updates.</span>'
+        ],
+        videoUrl: 'https://storage.googleapis.com/aiii-storage-public/Jo/pcplus_demo_b.mov',
+        warning: '目前串接 Demo 資料庫，點擊「確認新增」後系統需約 1-3 秒寫入資料，請耐心等候，勿重複點擊。<br><span class="en-sub">Connected to Demo DB. Please wait 1-3s after confirming.</span>'
+      },
+      {
+        id: 'C',
+        title: 'Plan 的排程與執行<span class="en-sub">Plan Scheduling & Execution</span>',
+        desc: '將規劃好的計畫 (Plan) 實際安排到行事曆 (Schedule) 上。<br><span class="en-sub">Assign planned items to the actual Schedule.</span>',
+        steps: [
+          '點擊左側選單「工作總覽」。<br><span class="en-sub">Click "Work Overview" on the left menu.</span>',
+          '在 Plan 分頁找到狀態為「已排定」的項目。<br><span class="en-sub">Find items with status "Scheduled" in the Plan tab.</span>',
+          '點擊右側操作欄的「日曆圖示 (安排行程)」。<br><span class="en-sub">Click the "Calendar Icon" (Schedule) in the action column.</span>',
+          '確認自動帶入的資訊，設定「時段」(上午/下午) 與「起訖時間」。<br><span class="en-sub">Check info, set "Session" (AM/PM) and "Start/End Time".</span>',
+          '(若為訪視) 選擇訪視方式 (面對面/電話)。<br><span class="en-sub">(If Visit) Select method (In-person/Phone).</span>',
+          '點擊「新增至班表」。<br><span class="en-sub">Click "Add to Schedule".</span>'
+        ],
+        videoUrl: 'https://storage.googleapis.com/aiii-storage-public/Jo/pcplus_demo_c.mov',
+        warning: '目前串接 Demo 資料庫，點擊「新增至班表」後系統需約 1-3 秒寫入資料，請耐心等候，勿重複點擊。<br><span class="en-sub">Connected to Demo DB. Please wait 1-3s after adding to schedule.</span>'
+      },
+      {
+        id: 'D',
+        title: '查看工作總覽與行程<span class="en-sub">Overview & Schedule Check</span>',
+        desc: '確認 Dashboard 資訊與隱碼功能。<br><span class="en-sub">Check Dashboard info and Data Masking feature.</span>',
+        steps: [
+          '點擊左側選單「Dashboard」。<br><span class="en-sub">Click "Dashboard" on the left menu.</span>',
+          '檢視「今日行程」分頁，確認剛才安排的行程是否出現。<br><span class="en-sub">Check "Today\'s Schedule" to see if the item appears.</span>',
+          '點擊右上角開關「顯示完整姓名」，測試病患姓名的隱碼/顯示切換。<br><span class="en-sub">Toggle "Show Full Name" to test masking/unmasking.</span>',
+          '點擊左側選單「工作總覽」。<br><span class="en-sub">Click "Work Overview" on the left menu.</span>',
+          '切換上方分頁 (Plan / Note / Daily Log)，確認僅顯示自己負責的資料。<br><span class="en-sub">Switch tabs (Plan / Note / Daily Log) to see only your data.</span>'
+        ],
+        videoUrl: 'https://storage.googleapis.com/aiii-storage-public/Jo/pcplus_demo_d.mov'
+      },
+      {
+        id: 'E',
+        title: '執行服務記錄 (打卡)<span class="en-sub">Service Record (Check-in)</span>',
+        desc: '完成行程後，填寫服務紀錄並結案。<br><span class="en-sub">Fill in service record and close the case after completion.</span>',
+        steps: [
+          '回到「Dashboard」首頁的「今日行程」。<br><span class="en-sub">Go back to "Today\'s Schedule" on Dashboard.</span>',
+          '找到一個「駐診服務」或「訪視」類型的行程。<br><span class="en-sub">Find a "Clinic Service" or "Visit" schedule item.</span>',
+          '點擊「服務紀錄」按鈕 (僅當日行程可見)。<br><span class="en-sub">Click "Service Record" button (Only visible for today).</span>',
+          '填寫實際起訖時間、勾選服務內容。<br><span class="en-sub">Fill actual Start/End time and check service content.</span>',
+          '注意：若有關聯 Plan，確認下方出現綠色區塊「一併結案關聯 Plan」。<br><span class="en-sub">Note: If linked to a Plan, ensure "Close Linked Plan" appears green.</span>',
+          '點擊「儲存紀錄」，確認狀態變更為「已服務紀錄」。<br><span class="en-sub">Click "Save Record" and verify status changes to "Recorded".</span>'
+        ],
+        videoUrl: 'https://storage.googleapis.com/aiii-storage-public/Jo/pcplus_demo_e.mov',
+        warning: '目前串接 Demo 資料庫，點擊「儲存紀錄」後系統需約 1-3 秒處理資料更新，請耐心等候，勿重複點擊。<br><span class="en-sub">Connected to Demo DB. Please wait 1-3s after saving.</span>'
+      },
+      {
+        id: 'F',
+        title: '執行未到診服務記錄<span class="en-sub">Missed Visit Record</span>',
+        desc: '當病患爽約或行程取消時的紀錄流程。<br><span class="en-sub">Process for no-shows or cancelled schedules.</span>',
+        steps: [
+          '在「Dashboard」今日行程中選擇一個尚未執行的行程。<br><span class="en-sub">Select a pending schedule in "Today\'s Schedule".</span>',
+          '點擊「未到診服務」按鈕。<br><span class="en-sub">Click "Missed Visit" button.</span>',
+          '下拉選擇原因 (如：病患拒絕、醫師休診)。<br><span class="en-sub">Select reason (e.g., Patient Refused, Doctor Off).</span>',
+          '填寫補充說明。<br><span class="en-sub">Fill in supplementary notes.</span>',
+          '點擊「確認回報」，確認該行程狀態變更為「未到診服務」(灰色/外框)。<br><span class="en-sub">Click "Confirm Report" and verify status changes to "Missed Visit".</span>'
+        ],
+        videoUrl: 'https://storage.googleapis.com/aiii-storage-public/Jo/pcplus_demo_f.mov',
+        warning: '目前串接 Demo 資料庫，點擊「確認回報」後系統需約 1-3 秒處理資料更新，請耐心等候，勿重複點擊。<br><span class="en-sub">Connected to Demo DB. Please wait 1-3s after confirming.</span>'
+      }
+    ];
+
+    // --- Logic: 頁面切換與初始化 ---
+
+    // 1. 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      initScenarioMenu();
+      loadScenario(0); // 預設載入第一個情境
+    });
+
+    // 2. 切換主分頁 (說明 vs 情境)
+    // 修正：接收 btnElement 參數，直接操作該元素
+    function switchMainTab(tabName, btnElement) {
+      // 移除所有按鈕的 active 樣式
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      
+      // 將點擊的按鈕設為 active (如果有的話)
+      if (btnElement) {
+        btnElement.classList.add('active');
+      }
+
+      // 切換內容顯示
+      document.getElementById('tab-instructions').classList.add('hidden');
+      document.getElementById('tab-scenarios').classList.add('hidden');
+      
+      const targetTab = document.getElementById('tab-' + tabName);
+      if (targetTab) {
+        targetTab.classList.remove('hidden');
+      }
+    }
+
+    // 3. 初始化情境選單
+    function initScenarioMenu() {
+      const menuContainer = document.getElementById('scenario-menu');
+      scenarios.forEach((s, index) => {
+        const btn = document.createElement('div');
+        btn.className = 'scenario-btn';
+        if(index === 0) btn.classList.add('active');
+        // title already includes en-sub span
+        btn.innerHTML = `<span class="code">情境 ${s.id}</span>${s.title}`;
+        btn.onclick = () => {
+          // Remove active class from all
+          document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+          // Add to current
+          btn.classList.add('active');
+          // Load content
+          loadScenario(index);
+        };
+        menuContainer.appendChild(btn);
+      });
+    }
+
+    // 4. 載入單一情境內容
+    function loadScenario(index) {
+      const s = scenarios[index];
+      const container = document.getElementById('scenario-content');
+      
+      // 生成步驟列表 HTML
+      const stepsHtml = s.steps.map(step => `<li>${step}</li>`).join('');
+
+      // 影片區塊邏輯
+      let videoHtml = '';
+      if (s.videoUrl) {
+        // 判斷是否為直接檔案連結
+        if (s.videoUrl.includes('storage.googleapis.com') || s.videoUrl.endsWith('.mp4') || s.videoUrl.endsWith('.mov')) {
+            videoHtml = `
+              <video controls autoplay muted playsinline>
+                <source src="${s.videoUrl}" type="video/mp4">
+                <source src="${s.videoUrl}" type="video/quicktime">
+                您的瀏覽器不支援此影片標籤，請嘗試下載播放：<a href="${s.videoUrl}">下載影片</a><br>
+                <span class="en-sub">Browser doesn't support video tag. <a href="${s.videoUrl}">Download Video</a></span>
+              </video>`;
+        } else {
+            // iframe
+            videoHtml = `
+              <iframe 
+                src="${s.videoUrl}" 
+                width="100%" 
+                height="100%" 
+                style="border:none; min-height:400px;" 
+                allow="autoplay; fullscreen">
+              </iframe>`;
+        }
+      } else {
+        // 無影片時的佔位符
+        videoHtml = `
+          <div style="text-align:center;">
+            <div style="font-size:3rem; opacity:0.5; margin-bottom:10px;">🎥</div>
+            <div>
+              <strong>待補上螢幕錄影</strong><br>
+              <span class="en-sub">Screen recording pending</span><br>
+              ${s.title}
+            </div>
+          </div>`;
+      }
+
+      // 生成警語 HTML (若有)
+      let warningHtml = '';
+      if (s.warning) {
+        warningHtml = `
+          <div class="warning-box">
+            <div style="font-size: 1.2rem;">⚠️</div>
+            <div>
+              <strong>Demo 系統提示：</strong>${s.warning}
+            </div>
+          </div>`;
+      }
+
+      container.innerHTML = `
+        <div class="scenario-header">
+          <div style="color: var(--accent-teal); font-weight:bold; margin-bottom:5px;">情境 ${s.id} (Scenario ${s.id})</div>
+          <h3>${s.title}</h3>
+          <p style="color:#666;">${s.desc}</p>
+        </div>
+        
+        ${warningHtml}
+
+        <ul class="step-list">
+          ${stepsHtml}
+        </ul>
+
+        <div class="video-container" style="${s.videoUrl ? 'background:black;' : 'background:var(--ivory);'}">
+          ${videoHtml}
+        </div>
+      `;
+    }
+  
+      // 自動觸發初始化 (適用於包含 initScenarioMenu 的腳本)
+      if (typeof initScenarioMenu === 'function') initScenarioMenu();
+      if (typeof loadScenario === 'function') loadScenario(0);
+    </script>
+  </template>
 
   <script>
-    // =========================================================
-    // 🟢 設定區 (請 BD/AM 修改這裡)
-    // =========================================================
-    
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxlFcznIZz98m7lkqo8l5_lDenFTNJi-hQSxQEXFkiIo3s5uFOCIcFsjCNjUKDKbqaOZg/exec'; // 您已設定好的 GAS 網址
-    const DOCUMENT_KEY = 'zppc_phase1_testDocument'; // 【請修改】對應 Google Sheet 的 document_key
-    
-    // 【請修改】請將 AI 產出的 HTML 內容，透過轉換器轉成亂碼，貼在下方引號中
-    const PROTECTED_CONTENT = `PCFET0NUWVBFIGh0bWw+CjxodG1sPgo8aGVhZD4KICA8YmFzZSB0YXJnZXQ9Il90b3AiPgogIDwhLS0g5byV5YWlIEdvb2dsZSBGb250cyAtLT4KICA8bGluayBocmVmPSJodHRwczovL2ZvbnRzLmdvb2dsZWFwaXMuY29tL2NzczI/ZmFtaWx5PU5vdG8rU2FucytUQzp3Z2h0QDMwMDs0MDA7NTAwOzcwMCZmYW1pbHk9Tm90bytTZXJpZitUQzp3Z2h0QDQwMDs3MDAmZmFtaWx5PVBldHJvbmE6d2dodEA0MDA7NjAwJmZhbWlseT1Xb3JrK1NhbnM6d2dodEA0MDA7NjAwJmRpc3BsYXk9c3dhcCIgcmVsPSJzdHlsZXNoZWV0Ij4KICAKICA8c3R5bGU+CiAgICAvKiAtLS0gQnJhbmRpbmcgVmFyaWFibGVzIC0tLSAqLwogICAgOnJvb3QgewogICAgICAtLXNreTogI0FFRTBFODsKICAgICAgLS1wYWxlLWdyZWVuOiAjRDlFQ0QyOwogICAgICAtLWxpZ2h0LWdyZWVuOiAjRTRGMkU3OwogICAgICAtLWl2b3J5OiAjRjVGQUYyOwogICAgICAtLWRhcmstdGVhbDogIzIwNEQ0QzsKICAgICAgLS1hY2NlbnQtdGVhbDogIzUxQTA5OTsKICAgICAgLS1ibGFjazogIzAwMDAwMDsKICAgICAgLS13aGl0ZTogI0ZGRkZGRjsKICAgICAgLS13YXJuaW5nLWJnOiAjZmZmOGUxOyAvKiDmn5TlkoznmoTpu4PoibLog4zmma/nlKjmlrzorabnpLogKi8KICAgICAgLS13YXJuaW5nLWJvcmRlcjogI2ZmZTA4MjsKICAgICAgCiAgICAgIC0tZ3JhZGllbnQtbWFpbjogbGluZWFyLWdyYWRpZW50KDQ1ZGVnLCB2YXIoLS1za3kpLCB2YXIoLS1saWdodC1ncmVlbikpOwogICAgICAtLWdyYWRpZW50LWhvdmVyOiBsaW5lYXItZ3JhZGllbnQoNDVkZWcsIHZhcigtLXBhbGUtZ3JlZW4pLCB2YXIoLS1pdm9yeSkpOwoKICAgICAgLS1mb250LWhlYWRlcjogJ1dvcmsgU2FucycsICdOb3RvIFNhbnMgVEMnLCBzYW5zLXNlcmlmOwogICAgICAtLWZvbnQtYm9keTogJ1dvcmsgU2FucycsICdOb3RvIFNhbnMgVEMnLCBzYW5zLXNlcmlmOwogICAgfQoKICAgICogeyBib3gtc2l6aW5nOiBib3JkZXItYm94OyB9CgogICAgYm9keSB7CiAgICAgIG1hcmdpbjogMDsKICAgICAgcGFkZGluZzogMDsKICAgICAgZm9udC1mYW1pbHk6IHZhcigtLWZvbnQtYm9keSk7CiAgICAgIGJhY2tncm91bmQtY29sb3I6IHZhcigtLWl2b3J5KTsKICAgICAgY29sb3I6IHZhcigtLWJsYWNrKTsKICAgICAgaGVpZ2h0OiAxMDB2aDsKICAgICAgZGlzcGxheTogZmxleDsKICAgICAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjsKICAgIH0KCiAgICAvKiBIZWxwZXIgY2xhc3MgZm9yIEVuZ2xpc2ggdGV4dCBzdHlsaW5nICovCiAgICAuZW4tc3ViIHsKICAgICAgZGlzcGxheTogYmxvY2s7CiAgICAgIGZvbnQtc2l6ZTogMC44NWVtOwogICAgICBvcGFjaXR5OiAwLjg1OwogICAgICBmb250LXdlaWdodDogNDAwOwogICAgICBtYXJnaW4tdG9wOiA0cHg7CiAgICAgIGxpbmUtaGVpZ2h0OiAxLjM7CiAgICAgIHBvaW50ZXItZXZlbnRzOiBub25lOyAvKiDorpPpu57mk4rkuovku7bnqb/pgI/mloflrZfvvIznm7TmjqXkvZznlKjlnKjmjInpiJXkuIogKOmhjeWkluS/nemaqikgKi8KICAgIH0KCiAgICAvKiAtLS0gSGVhZGVyIC0tLSAqLwogICAgLmhlYWRlciB7CiAgICAgIGJhY2tncm91bmQ6IHZhcigtLXdoaXRlKTsKICAgICAgcGFkZGluZzogMTVweCAzMHB4OwogICAgICBkaXNwbGF5OiBmbGV4OwogICAgICBhbGlnbi1pdGVtczogY2VudGVyOwogICAgICBqdXN0aWZ5LWNvbnRlbnQ6IHNwYWNlLWJldHdlZW47CiAgICAgIGJvcmRlci1ib3R0b206IDNweCBzb2xpZCB2YXIoLS1wYWxlLWdyZWVuKTsKICAgICAgYm94LXNoYWRvdzogMCAycHggMTBweCByZ2JhKDAsMCwwLDAuMDUpOwogICAgICBmbGV4LXNocmluazogMDsKICAgIH0KCiAgICAubG9nbyBpbWcgewogICAgICBoZWlnaHQ6IDQwcHg7CiAgICB9CgogICAgLmhlYWRlci10aXRsZSB7CiAgICAgIGZvbnQtZmFtaWx5OiB2YXIoLS1mb250LWhlYWRlcik7CiAgICAgIGNvbG9yOiB2YXIoLS1kYXJrLXRlYWwpOwogICAgICBmb250LXdlaWdodDogNzAwOwogICAgICBmb250LXNpemU6IDEuMnJlbTsKICAgICAgdGV4dC1hbGlnbjogcmlnaHQ7CiAgICB9CgogICAgLyogLS0tIE1haW4gTGF5b3V0IC0tLSAqLwogICAgLm1haW4tY29udGFpbmVyIHsKICAgICAgZGlzcGxheTogZmxleDsKICAgICAgZmxleDogMTsKICAgICAgb3ZlcmZsb3c6IGhpZGRlbjsKICAgIH0KCiAgICAvKiAtLS0gU2lkZWJhciAoTWFpbiBUYWJzKSAtLS0gKi8KICAgIC5zaWRlYmFyIHsKICAgICAgd2lkdGg6IDI1MHB4OwogICAgICBiYWNrZ3JvdW5kLWNvbG9yOiB2YXIoLS1kYXJrLXRlYWwpOwogICAgICBjb2xvcjogdmFyKC0td2hpdGUpOwogICAgICBkaXNwbGF5OiBmbGV4OwogICAgICBmbGV4LWRpcmVjdGlvbjogY29sdW1uOwogICAgICBwYWRkaW5nOiAyMHB4IDA7CiAgICAgIGZsZXgtc2hyaW5rOiAwOwogICAgfQoKICAgIC5uYXYtYnRuIHsKICAgICAgYmFja2dyb3VuZDogdHJhbnNwYXJlbnQ7CiAgICAgIGJvcmRlcjogbm9uZTsKICAgICAgY29sb3I6IHZhcigtLXdoaXRlKTsKICAgICAgcGFkZGluZzogMTVweCAyNXB4OwogICAgICB0ZXh0LWFsaWduOiBsZWZ0OwogICAgICBmb250LWZhbWlseTogdmFyKC0tZm9udC1oZWFkZXIpOwogICAgICBmb250LXNpemU6IDEuMXJlbTsKICAgICAgY3Vyc29yOiBwb2ludGVyOwogICAgICB0cmFuc2l0aW9uOiBhbGwgMC4zczsKICAgICAgYm9yZGVyLWxlZnQ6IDRweCBzb2xpZCB0cmFuc3BhcmVudDsKICAgICAgb3BhY2l0eTogMC43OwogICAgICB3aWR0aDogMTAwJTsgLyog56K65L+d5oyJ6YiV5aGr5ru/5a+s5bqmICovCiAgICB9CgogICAgLm5hdi1idG46aG92ZXIgewogICAgICBiYWNrZ3JvdW5kLWNvbG9yOiByZ2JhKDI1NSwyNTUsMjU1LDAuMSk7CiAgICAgIG9wYWNpdHk6IDE7CiAgICB9CgogICAgLm5hdi1idG4uYWN0aXZlIHsKICAgICAgYmFja2dyb3VuZC1jb2xvcjogcmdiYSgyNTUsMjU1LDI1NSwwLjE1KTsKICAgICAgYm9yZGVyLWxlZnQ6IDRweCBzb2xpZCB2YXIoLS1za3kpOwogICAgICBvcGFjaXR5OiAxOwogICAgICBmb250LXdlaWdodDogYm9sZDsKICAgIH0KCiAgICAvKiAtLS0gQ29udGVudCBBcmVhIC0tLSAqLwogICAgLmNvbnRlbnQtYXJlYSB7CiAgICAgIGZsZXg6IDE7CiAgICAgIHBhZGRpbmc6IDMwcHg7CiAgICAgIG92ZXJmbG93LXk6IGF1dG87CiAgICAgIGJhY2tncm91bmQtY29sb3I6IHZhcigtLWl2b3J5KTsKICAgIH0KCiAgICAvKiAtLS0gU2VjdGlvbjogSW50cm8gLS0tICovCiAgICAuaW50cm8tY29udGFpbmVyIHsKICAgICAgbWF4LXdpZHRoOiA4MDBweDsKICAgICAgbWFyZ2luOiAwIGF1dG87CiAgICB9CgogICAgLmNhcmQgewogICAgICBiYWNrZ3JvdW5kOiB2YXIoLS13aGl0ZSk7CiAgICAgIGJvcmRlci1yYWRpdXM6IDEycHg7CiAgICAgIHBhZGRpbmc6IDMwcHg7CiAgICAgIG1hcmdpbi1ib3R0b206IDIwcHg7CiAgICAgIGJveC1zaGFkb3c6IDAgNHB4IDE1cHggcmdiYSgzMiwgNzcsIDc2LCAwLjA4KTsKICAgICAgYm9yZGVyLXRvcDogNXB4IHNvbGlkIHZhcigtLXNreSk7CiAgICB9CgogICAgaDIgewogICAgICBmb250LWZhbWlseTogdmFyKC0tZm9udC1oZWFkZXIpOwogICAgICBjb2xvcjogdmFyKC0tZGFyay10ZWFsKTsKICAgICAgbWFyZ2luLXRvcDogMDsKICAgICAgcGFkZGluZy1ib3R0b206IDEwcHg7CiAgICAgIGJvcmRlci1ib3R0b206IDFweCBzb2xpZCB2YXIoLS1wYWxlLWdyZWVuKTsKICAgIH0KCiAgICAubG9naW4tYm94IHsKICAgICAgYmFja2dyb3VuZDogdmFyKC0tbGlnaHQtZ3JlZW4pOwogICAgICBwYWRkaW5nOiAyMHB4OwogICAgICBib3JkZXItcmFkaXVzOiA4cHg7CiAgICAgIG1hcmdpbjogMTVweCAwOwogICAgICBjb2xvcjogdmFyKC0tZGFyay10ZWFsKTsKICAgIH0KCiAgICB1bCB7CiAgICAgIHBhZGRpbmctbGVmdDogMjBweDsKICAgIH0KICAgIAogICAgbGkgewogICAgICBtYXJnaW4tYm90dG9tOiA4cHg7CiAgICB9CgogICAgLyogLS0tIFNlY3Rpb246IFNjZW5hcmlvcyBMYXlvdXQgLS0tICovCiAgICAuc2NlbmFyaW8td3JhcHBlciB7CiAgICAgIGRpc3BsYXk6IGZsZXg7CiAgICAgIGdhcDogMjBweDsKICAgICAgaGVpZ2h0OiAxMDAlOwogICAgfQoKICAgIC8qIFNjZW5hcmlvIE5hdmlnYXRpb24gKElubmVyIFNpZGViYXIpICovCiAgICAuc2NlbmFyaW8tbmF2IHsKICAgICAgd2lkdGg6IDI4MHB4OwogICAgICBkaXNwbGF5OiBmbGV4OwogICAgICBmbGV4LWRpcmVjdGlvbjogY29sdW1uOwogICAgICBnYXA6IDEwcHg7CiAgICAgIHBhZGRpbmctcmlnaHQ6IDEwcHg7CiAgICAgIG92ZXJmbG93LXk6IGF1dG87CiAgICB9CgogICAgLnNjZW5hcmlvLWJ0biB7CiAgICAgIGJhY2tncm91bmQ6IHZhcigtLXdoaXRlKTsKICAgICAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tcGFsZS1ncmVlbik7CiAgICAgIHBhZGRpbmc6IDE1cHg7CiAgICAgIGJvcmRlci1yYWRpdXM6IDhweDsKICAgICAgdGV4dC1hbGlnbjogbGVmdDsKICAgICAgY3Vyc29yOiBwb2ludGVyOwogICAgICB0cmFuc2l0aW9uOiAwLjNzOwogICAgICBwb3NpdGlvbjogcmVsYXRpdmU7CiAgICB9CgogICAgLnNjZW5hcmlvLWJ0bjpob3ZlciB7CiAgICAgIGJvcmRlci1jb2xvcjogdmFyKC0tZGFyay10ZWFsKTsKICAgICAgdHJhbnNmb3JtOiB0cmFuc2xhdGVYKDVweCk7CiAgICB9CgogICAgLnNjZW5hcmlvLWJ0bi5hY3RpdmUgewogICAgICBiYWNrZ3JvdW5kOiB2YXIoLS1ncmFkaWVudC1tYWluKTsKICAgICAgYm9yZGVyLWNvbG9yOiB0cmFuc3BhcmVudDsKICAgICAgY29sb3I6IHZhcigtLWRhcmstdGVhbCk7CiAgICAgIGZvbnQtd2VpZ2h0OiBib2xkOwogICAgICBib3gtc2hhZG93OiAwIDRweCAxMHB4IHJnYmEoMCwwLDAsMC4xKTsKICAgIH0KCiAgICAuc2NlbmFyaW8tYnRuIC5jb2RlIHsKICAgICAgZm9udC1zaXplOiAwLjhyZW07CiAgICAgIG9wYWNpdHk6IDAuNzsKICAgICAgZGlzcGxheTogYmxvY2s7CiAgICAgIG1hcmdpbi1ib3R0b206IDRweDsKICAgIH0KCiAgICAvKiBTY2VuYXJpbyBEZXRhaWwgKi8KICAgIC5zY2VuYXJpby1kZXRhaWwgewogICAgICBmbGV4OiAxOwogICAgICBiYWNrZ3JvdW5kOiB2YXIoLS13aGl0ZSk7CiAgICAgIGJvcmRlci1yYWRpdXM6IDEycHg7CiAgICAgIHBhZGRpbmc6IDMwcHg7CiAgICAgIGJveC1zaGFkb3c6IDAgNHB4IDE1cHggcmdiYSgzMiwgNzcsIDc2LCAwLjA4KTsKICAgICAgb3ZlcmZsb3cteTogYXV0bzsKICAgICAgZGlzcGxheTogZmxleDsKICAgICAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjsKICAgIH0KCiAgICAuc2NlbmFyaW8taGVhZGVyIHsKICAgICAgbWFyZ2luLWJvdHRvbTogMTBweDsKICAgIH0KICAgIAogICAgLnNjZW5hcmlvLWhlYWRlciBoMyB7CiAgICAgIGZvbnQtZmFtaWx5OiB2YXIoLS1mb250LWhlYWRlcik7CiAgICAgIGNvbG9yOiB2YXIoLS1kYXJrLXRlYWwpOwogICAgICBmb250LXNpemU6IDEuOHJlbTsKICAgICAgbWFyZ2luOiAwIDAgMTBweCAwOwogICAgfQoKICAgIC8qIFdhcm5pbmcgQm94ICovCiAgICAud2FybmluZy1ib3ggewogICAgICBiYWNrZ3JvdW5kLWNvbG9yOiB2YXIoLS13YXJuaW5nLWJnKTsKICAgICAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0td2FybmluZy1ib3JkZXIpOwogICAgICBjb2xvcjogI2IzNmIwMDsKICAgICAgcGFkZGluZzogMTJweCAxNXB4OwogICAgICBib3JkZXItcmFkaXVzOiA2cHg7CiAgICAgIG1hcmdpbi1ib3R0b206IDIwcHg7CiAgICAgIGZvbnQtc2l6ZTogMC45NXJlbTsKICAgICAgZGlzcGxheTogZmxleDsKICAgICAgYWxpZ24taXRlbXM6IHN0YXJ0OwogICAgICBnYXA6IDEwcHg7CiAgICB9CiAgICAud2FybmluZy1ib3ggc3Ryb25nIHsKICAgICAgY29sb3I6ICM5YzViMDA7CiAgICB9CgogICAgLnN0ZXAtbGlzdCB7CiAgICAgIGNvdW50ZXItcmVzZXQ6IHN0ZXA7CiAgICAgIGxpc3Qtc3R5bGU6IG5vbmU7CiAgICAgIHBhZGRpbmc6IDA7CiAgICAgIG1hcmdpbi1ib3R0b206IDMwcHg7CiAgICB9CgogICAgLnN0ZXAtbGlzdCBsaSB7CiAgICAgIHBvc2l0aW9uOiByZWxhdGl2ZTsKICAgICAgcGFkZGluZy1sZWZ0OiA0MHB4OwogICAgICBtYXJnaW4tYm90dG9tOiAxMnB4OwogICAgICBjb2xvcjogdmFyKC0tYmxhY2spOwogICAgfQoKICAgIC5zdGVwLWxpc3QgbGk6OmJlZm9yZSB7CiAgICAgIGNvdW50ZXItaW5jcmVtZW50OiBzdGVwOwogICAgICBjb250ZW50OiBjb3VudGVyKHN0ZXApOwogICAgICBwb3NpdGlvbjogYWJzb2x1dGU7CiAgICAgIGxlZnQ6IDA7CiAgICAgIHRvcDogMnB4OwogICAgICB3aWR0aDogMjRweDsKICAgICAgaGVpZ2h0OiAyNHB4OwogICAgICBiYWNrZ3JvdW5kLWNvbG9yOiB2YXIoLS1za3kpOwogICAgICBjb2xvcjogdmFyKC0tZGFyay10ZWFsKTsKICAgICAgYm9yZGVyLXJhZGl1czogNTAlOwogICAgICB0ZXh0LWFsaWduOiBjZW50ZXI7CiAgICAgIGxpbmUtaGVpZ2h0OiAyNHB4OwogICAgICBmb250LXdlaWdodDogYm9sZDsKICAgICAgZm9udC1zaXplOiAwLjhyZW07CiAgICB9CgogICAgLyogVmlkZW8gQ29udGFpbmVyICovCiAgICAudmlkZW8tY29udGFpbmVyIHsKICAgICAgbWFyZ2luLXRvcDogYXV0bzsKICAgICAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tYmxhY2spOwogICAgICBib3JkZXItcmFkaXVzOiAxMHB4OwogICAgICBtaW4taGVpZ2h0OiAzMDBweDsgCiAgICAgIGRpc3BsYXk6IGZsZXg7CiAgICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7CiAgICAgIGp1c3RpZnktY29udGVudDogY2VudGVyOwogICAgICBjb2xvcjogdmFyKC0td2hpdGUpOwogICAgICBwb3NpdGlvbjogcmVsYXRpdmU7CiAgICAgIG92ZXJmbG93OiBoaWRkZW47CiAgICB9CiAgICAKICAgIHZpZGVvIHsKICAgICAgbWF4LXdpZHRoOiAxMDAlOwogICAgICBtYXgtaGVpZ2h0OiA2MHZoOyAKICAgICAgYm94LXNoYWRvdzogMCA0cHggMTJweCByZ2JhKDAsMCwwLDAuMik7CiAgICB9CgogICAgLyogVXRpbGl0eSAqLwogICAgLmhpZGRlbiB7IGRpc3BsYXk6IG5vbmUgIWltcG9ydGFudDsgfQoKICAgIC8qIFJXRCAqLwogICAgQG1lZGlhIChtYXgtd2lkdGg6IDc2OHB4KSB7CiAgICAgIC5tYWluLWNvbnRhaW5lciB7IGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47IG92ZXJmbG93LXk6IGF1dG87fQogICAgICAuc2lkZWJhciB7IHdpZHRoOiAxMDAlOyBmbGV4LWRpcmVjdGlvbjogcm93OyBwYWRkaW5nOiAwOyBvdmVyZmxvdy14OiBhdXRvO30KICAgICAgLm5hdi1idG4geyBmbGV4OiAxOyB0ZXh0LWFsaWduOiBjZW50ZXI7IHBhZGRpbmc6IDEwcHg7IHdoaXRlLXNwYWNlOiBub3dyYXA7IGJvcmRlci1sZWZ0OiBub25lOyBib3JkZXItYm90dG9tOiA0cHggc29saWQgdHJhbnNwYXJlbnQ7IH0KICAgICAgLm5hdi1idG4uYWN0aXZlIHsgYm9yZGVyLWxlZnQ6IG5vbmU7IGJvcmRlci1ib3R0b206IDRweCBzb2xpZCB2YXIoLS1za3kpOyB9CiAgICAgIAogICAgICAuc2NlbmFyaW8td3JhcHBlciB7IGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47IH0KICAgICAgLnNjZW5hcmlvLW5hdiB7IHdpZHRoOiAxMDAlOyBtYXgtaGVpZ2h0OiAxNTBweDsgfQogICAgICAuY29udGVudC1hcmVhIHsgcGFkZGluZzogMTVweDsgfQogICAgfQogIDwvc3R5bGU+CjwvaGVhZD4KPGJvZHk+CgogIDwhLS0gSGVhZGVyIC0tPgogIDxoZWFkZXIgY2xhc3M9ImhlYWRlciI+CiAgICA8ZGl2IGNsYXNzPSJsb2dvIj4KICAgICAgPGltZyBzcmM9Imh0dHBzOi8vc3RvcmFnZS5nb29nbGVhcGlzLmNvbS9haWlpLXN0b3JhZ2UtcHVibGljL3pwdC9aUEgwMS5Mb2dvLlBPUy5wbmciIGFsdD0iTG9nbyI+CiAgICA8L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImhlYWRlci10aXRsZSI+CiAgICAgIOa4rOippuaTjeS9nOaJi+WGiiBCZXRhCiAgICAgIDxzcGFuIGNsYXNzPSJlbi1zdWIiIHN0eWxlPSJ0ZXh0LWFsaWduOiByaWdodDsiPlRlc3RpbmcgTWFudWFsIEJldGE8L3NwYW4+CiAgICA8L2Rpdj4KICA8L2hlYWRlcj4KCiAgPCEtLSBNYWluIENvbnRhaW5lciAtLT4KICA8ZGl2IGNsYXNzPSJtYWluLWNvbnRhaW5lciI+CiAgICAKICAgIDwhLS0gU2lkZWJhciBOYXZpZ2F0aW9uIC0tPgogICAgPG5hdiBjbGFzcz0ic2lkZWJhciI+CiAgICAgIDwhLS0g5L+u5q2j77ya5Yqg5YWlIHRoaXMg5Y+D5pW45YKz6YGeIC0tPgogICAgICA8YnV0dG9uIGNsYXNzPSJuYXYtYnRuIGFjdGl2ZSIgb25jbGljaz0ic3dpdGNoTWFpblRhYignaW5zdHJ1Y3Rpb25zJywgdGhpcykiPgogICAgICAgIDEuIOa4rOippuiqquaYjgogICAgICAgIDxzcGFuIGNsYXNzPSJlbi1zdWIiPlRlc3QgSW5zdHJ1Y3Rpb25zPC9zcGFuPgogICAgICA8L2J1dHRvbj4KICAgICAgPGJ1dHRvbiBjbGFzcz0ibmF2LWJ0biIgb25jbGljaz0ic3dpdGNoTWFpblRhYignc2NlbmFyaW9zJywgdGhpcykiPgogICAgICAgIDIuIOa4rOippuaDheWigwogICAgICAgIDxzcGFuIGNsYXNzPSJlbi1zdWIiPlRlc3QgU2NlbmFyaW9zPC9zcGFuPgogICAgICA8L2J1dHRvbj4KICAgIDwvbmF2PgoKICAgIDwhLS0gQ29udGVudCBBcmVhIC0tPgogICAgPG1haW4gY2xhc3M9ImNvbnRlbnQtYXJlYSI+CiAgICAgIAogICAgICA8IS0tIFRhYiAxOiDmuKzoqaboqqrmmI4gLS0+CiAgICAgIDxkaXYgaWQ9InRhYi1pbnN0cnVjdGlvbnMiIGNsYXNzPSJpbnRyby1jb250YWluZXIiPgogICAgICAgIDxkaXYgY2xhc3M9ImNhcmQiPgogICAgICAgICAgPGgyPgogICAgICAgICAgICDmuKzoqabpgKPntZDoiIfnmbvlhaUKICAgICAgICAgICAgPHNwYW4gY2xhc3M9ImVuLXN1YiI+VGVzdCBMaW5rICYgTG9naW48L3NwYW4+CiAgICAgICAgICA8L2gyPgogICAgICAgICAgPHA+CiAgICAgICAgICAgIOatoei/juS9v+eUqCBQQysgT3V0cmVhY2gg566h55CG5bmz5Y+wIEJldGEg54mI77yM6KuL5L2/55So5Lul5LiL6LOH6KiK55m75YWl77yaPGJyPgogICAgICAgICAgICA8c3BhbiBjbGFzcz0iZW4tc3ViIj5XZWxjb21lIHRvIFBDKyBPdXRyZWFjaCBNYW5hZ2VtZW50IFBsYXRmb3JtIEJldGEuIFBsZWFzZSB1c2UgdGhlIGZvbGxvd2luZyBpbmZvIHRvIGxvZyBpbjo8L3NwYW4+CiAgICAgICAgICA8L3A+CiAgICAgICAgICAKICAgICAgICAgIDxkaXYgY2xhc3M9ImxvZ2luLWJveCI+CiAgICAgICAgICAgIDxzdHJvbmc+5ris6Kmm6YCj57WQ77yaPC9zdHJvbmc+IDxzcGFuIHN0eWxlPSJmb250LXNpemU6MC45ZW0iPihUZXN0IExpbmspPC9zcGFuPjxicj4KICAgICAgICAgICAgPGEgaHJlZj0iaHR0cHM6Ly9zdHVkaW8tLXpwLW91dHJlYWNoLW1vZHVsZS04MTUyOS1iOGE0MC51cy1jZW50cmFsMS5ob3N0ZWQuYXBwL2xvZ2luIiB0YXJnZXQ9Il9ibGFuayIgc3R5bGU9ImNvbG9yOiAjMjA0RDRDOyBmb250LXdlaWdodDogYm9sZDsiPgogICAgICAgICAgICAgIOm7nuaTiuWJjeW+gOa4rOippueSsOWigzxicj4KICAgICAgICAgICAgICA8c3BhbiBzdHlsZT0iZm9udC13ZWlnaHQ6bm9ybWFsOyBmb250LXNpemU6MC45ZW07Ij5DbGljayB0byB2aXNpdCBUZXN0IEVudmlyb25tZW50PC9zcGFuPgogICAgICAgICAgICA8L2E+PGJyPjxicj4KICAgICAgICAgICAgPHN0cm9uZz7kuLvnrqHluLPomZ/os4foqIrvvJo8L3N0cm9uZz4gPHNwYW4gc3R5bGU9ImZvbnQtc2l6ZTowLjllbSI+KFN1cGVydmlzb3IgQWNjb3VudCBJbmZvKTwvc3Bhbj48YnI+CiAgICAgICAgICAgIOKAoiDmiYvmqZ/omZ/norwgKE1vYmlsZSnvvJo8Y29kZT4wOTExMTExMTExPC9jb2RlPjxicj4KICAgICAgICAgICAg4oCiIE9UUOmpl+itieeivCAoT1RQKe+8mjxjb2RlPjEyMzQ1NjwvY29kZT48YnI+CiAgICAgICAgICAgIOKAoiDlr4bnorwgKFBhc3N3b3JkKe+8mjxjb2RlPjEyMzQ1NjwvY29kZT4KICAgICAgICAgIDwvZGl2PgogICAgICAgIDwvZGl2PgoKICAgICAgICA8ZGl2IGNsYXNzPSJjYXJkIj4KICAgICAgICAgIDxoMj4KICAgICAgICAgICAg5ris6Kmm6YeN6bue6IiH5rOo5oSP5LqL6aCFCiAgICAgICAgICAgIDxzcGFuIGNsYXNzPSJlbi1zdWIiPlRlc3RpbmcgRm9jdXMgJiBOb3RpY2VzPC9zcGFuPgogICAgICAgICAgPC9oMj4KICAgICAgICAgIDx1bD4KICAgICAgICAgICAgPGxpPgogICAgICAgICAgICAgIDxzdHJvbmc+5oOF5aKD5pON5L2c77yaPC9zdHJvbmc+6KuL5YiH5o+b6Iez44CM5ris6Kmm5oOF5aKD44CN5YiG6aCB77yM5L6d5bqP5a6M5oiQIEF+RiDnmoTmk43kvZzmtYHnqIvjgII8YnI+CiAgICAgICAgICAgICAgPHNwYW4gY2xhc3M9ImVuLXN1YiI+PHN0cm9uZz5TY2VuYXJpbyBPcHM6PC9zdHJvbmc+IFBsZWFzZSBzd2l0Y2ggdG8gdGhlICJUZXN0IFNjZW5hcmlvcyIgdGFiIGFuZCBjb21wbGV0ZSBzdGVwcyBBfkYgaW4gb3JkZXIuPC9zcGFuPgogICAgICAgICAgICA8L2xpPgogICAgICAgICAgICA8bGk+CiAgICAgICAgICAgICAgPHN0cm9uZz7lj43ppYvmlrnlvI/vvJo8L3N0cm9uZz7oi6XmnInku7vkvZXlu7rorbDvvIzoq4vmlrwgPHN0cm9uZz4wMS8yM++8iOS6lO+8ieacg+itsDwvc3Ryb25nPiDkuIrmj5Dlh7rvvIzmiJblnKggTElORSDnvqTntYTnlZnoqIDvvIzlnJjpmorlsIfpgI/pgY4gQUkg6YCy6KGM5pS25pW044CCPGJyPgogICAgICAgICAgICAgIDxzcGFuIGNsYXNzPSJlbi1zdWIiPjxzdHJvbmc+RmVlZGJhY2s6PC9zdHJvbmc+IFBsZWFzZSBwcm92aWRlIHN1Z2dlc3Rpb25zIGluIHRoZSBtZWV0aW5nIG9uIDAxLzIzIChGcmkpIG9yIGxlYXZlIGEgbWVzc2FnZSBpbiB0aGUgTElORSBncm91cC48L3NwYW4+CiAgICAgICAgICAgIDwvbGk+CiAgICAgICAgICAgIDxsaT4KICAgICAgICAgICAgICA8c3Ryb25nPuaJi+apn+a4rOippu+8mjwvc3Ryb25nPuW5s+WPsOaUr+aPtCBSV0TvvIzoq4vli5nlv4XljZTliqnmuKzoqabmiYvmqZ/ku4vpnaLnmoTmk43kvZzpq5TpqZfjgII8YnI+CiAgICAgICAgICAgICAgPHNwYW4gY2xhc3M9ImVuLXN1YiI+PHN0cm9uZz5Nb2JpbGUgVGVzdDo8L3N0cm9uZz4gVGhlIHBsYXRmb3JtIHN1cHBvcnRzIFJXRDsgcGxlYXNlIHZlcmlmeSB0aGUgbW9iaWxlIGludGVyZmFjZSBleHBlcmllbmNlLjwvc3Bhbj4KICAgICAgICAgICAgPC9saT4KICAgICAgICAgICAgPGxpPgogICAgICAgICAgICAgIDxzdHJvbmc+6KOc5YWF6Kqq5piO77yaPC9zdHJvbmc+CiAgICAgICAgICAgICAgPHNwYW4gY2xhc3M9ImVuLXN1YiIgc3R5bGU9ImRpc3BsYXk6aW5saW5lOyI+KFN1cHBsZW1lbnRhcnkgTm90ZXMpPC9zcGFuPgogICAgICAgICAgICAgIDx1bD4KICAgICAgICAgICAgICAgIDxsaT7liJ3mrKHnmbvlhaUgRGFzaGJvYXJkIOiugOWPliBEZW1vIOizh+aWmee0hOmcgCAzLTUg56eS77yM6KuL6ICQ5b+D562J5YCZ44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPldhaXQgMy01cyBmb3IgRGVtbyBkYXRhIHRvIGxvYWQgdXBvbiBmaXJzdCBsb2dpbi48L3NwYW4+PC9saT4KICAgICAgICAgICAgICAgIDxsaT7oi6XmtYHnqIvljaHkvY/vvIzlu7rorbDph43mlrDmlbTnkIbpoIHpnaLmiJbph43mlrDnmbvlhaXjgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+SWYgc3R1Y2ssIHBsZWFzZSByZWZyZXNoIHRoZSBwYWdlIG9yIHJlLWxvZ2luLjwvc3Bhbj48L2xpPgogICAgICAgICAgICAgIDwvdWw+CiAgICAgICAgICAgIDwvbGk+CiAgICAgICAgICA8L3VsPgogICAgICAgIDwvZGl2PgogICAgICA8L2Rpdj4KCiAgICAgIDwhLS0gVGFiIDI6IOa4rOippuaDheWigyAo5YyF5ZCr5LqM57Sa5bCO6IiqKSAtLT4KICAgICAgPGRpdiBpZD0idGFiLXNjZW5hcmlvcyIgY2xhc3M9InNjZW5hcmlvLXdyYXBwZXIgaGlkZGVuIj4KICAgICAgICAKICAgICAgICA8IS0tIOW3puWBtOaDheWig+mBuOWWriAtLT4KICAgICAgICA8ZGl2IGNsYXNzPSJzY2VuYXJpby1uYXYiIGlkPSJzY2VuYXJpby1tZW51Ij4KICAgICAgICAgIDwhLS0gSlMg5bCH5YuV5oWL55Sf5oiQ5oyJ6YiVIC0tPgogICAgICAgIDwvZGl2PgoKICAgICAgICA8IS0tIOWPs+WBtOaDheWig+WFp+WuuSAtLT4KICAgICAgICA8ZGl2IGNsYXNzPSJzY2VuYXJpby1kZXRhaWwiPgogICAgICAgICAgPGRpdiBpZD0ic2NlbmFyaW8tY29udGVudCI+CiAgICAgICAgICAgIDwhLS0gSlMg5bCH5YuV5oWL5aGr5YWl5YWn5a65IC0tPgogICAgICAgICAgPC9kaXY+CiAgICAgICAgPC9kaXY+CgogICAgICA8L2Rpdj4KCiAgICA8L21haW4+CiAgPC9kaXY+CgogIDxzY3JpcHQ+CiAgICAvLyAtLS0gRGF0YTog5ris6Kmm5oOF5aKD6LOH5paZICjljIXlkKvkuK3oi7Hmlofnv7vora8pIC0tLQogICAgY29uc3Qgc2NlbmFyaW9zID0gWwogICAgICB7CiAgICAgICAgaWQ6ICdBJywKICAgICAgICB0aXRsZTogJ+aWsOeXheaCo+aUtuahiOiIh+W7uuaqlDxzcGFuIGNsYXNzPSJlbi1zdWIiPk5ldyBQYXRpZW50IEVucm9sbG1lbnQ8L3NwYW4+JywKICAgICAgICBkZXNjOiAn5qih5pOs5YCL566h5bir5Zyo54++5aC05oiW5pS25Yiw6LOH5paZ5b6M77yM5bCH5paw55eF5oKj6LOH5paZ6Ly45YWl57O757Wx44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPlNpbXVsYXRlIGEgQ2FzZSBNYW5hZ2VyIGVudGVyaW5nIG5ldyBwYXRpZW50IGRhdGEgaW50byB0aGUgc3lzdGVtIHVwb24gcmVjZWl2aW5nIGl0Ljwvc3Bhbj4nLAogICAgICAgIHN0ZXBzOiBbCiAgICAgICAgICAn6bue5pOK5bem5YG06YG45Zau44CM55eF5oKj566h55CG44CN44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPkNsaWNrICJQYXRpZW50IE1hbmFnZW1lbnQiIG9uIHRoZSBsZWZ0IG1lbnUuPC9zcGFuPicsCiAgICAgICAgICAn6bue5pOK5Y+z5LiK6KeS44CM5paw5aKe55eF5oKj44CN5oyJ6YiV44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPkNsaWNrIHRoZSAiQWRkIFBhdGllbnQiIGJ1dHRvbiBvbiB0aGUgdG9wIHJpZ2h0Ljwvc3Bhbj4nLAogICAgICAgICAgJ+Whq+Wvq+izh+aWme+8mumBuOaTh+WwiOahiCAo5aaC77ya6IiS5Yqb5aalKeOAgemGq+W4qyAo57O757Wx6Ieq5YuV6YGO5r++KeOAgei8uOWFpeWnk+WQjS/miYvmqZ8v5oCn5Yil44CB6YG45pOH5pS25qGI5pel5pyf44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPkZpbGwgaW4gZGF0YTogU2VsZWN0IFByb2plY3QsIERvY3RvciwgTmFtZS9Nb2JpbGUvR2VuZGVyLCBhbmQgRW5yb2xsbWVudCBEYXRlLjwvc3Bhbj4nLAogICAgICAgICAgJ+m7nuaTiuiZm+e3muWNgOWhiuOAjOS4iuWCs+WQjOaEj+abuOOAjSAo5ris6Kmm55So5Y+v6YG45Lu75oSP5ZyW54mH5oiWUERGKeOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5DbGljayAiVXBsb2FkIENvbnNlbnQgRm9ybSIgKFNlbGVjdCBhbnkgaW1hZ2UvUERGIGZvciB0ZXN0aW5nKS48L3NwYW4+JywKICAgICAgICAgICfpu57mk4rjgIznorrlrprmlrDlop7jgI3jgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+Q2xpY2sgIkNvbmZpcm0gQWRkIi48L3NwYW4+JywKICAgICAgICAgICfnorroqo3liJfooajlh7rnj77mlrDnl4XmgqPvvIzni4DmhYvpoa/npLrngrrjgIzlr6nmoLjkuK3jgI3jgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+VmVyaWZ5IHRoZSBuZXcgcGF0aWVudCBhcHBlYXJzIGluIHRoZSBsaXN0IHdpdGggc3RhdHVzICJVbmRlciBSZXZpZXciLjwvc3Bhbj4nCiAgICAgICAgXSwKICAgICAgICB2aWRlb1VybDogJ2h0dHBzOi8vc3RvcmFnZS5nb29nbGVhcGlzLmNvbS9haWlpLXN0b3JhZ2UtcHVibGljL0pvL3BjcGx1c19kZW1vX2EubW92JywKICAgICAgICB3YXJuaW5nOiAn55uu5YmN5Liy5o6lIERlbW8g6LOH5paZ5bqr77yM6bue5pOK44CM56K65a6a5paw5aKe44CN5b6M57O757Wx6ZyA57SEIDEtMyDnp5Llr6vlhaXos4fmlpnvvIzoq4vogJDlv4PnrYnlgJnvvIzli7/ph43opIfpu57mk4rjgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+Q29ubmVjdGVkIHRvIERlbW8gREIuIFN5c3RlbSBuZWVkcyAxLTNzIHRvIHdyaXRlIGRhdGEgYWZ0ZXIgY2xpY2tpbmcgY29uZmlybS4gUGxlYXNlIHdhaXQuPC9zcGFuPicKICAgICAgfSwKICAgICAgewogICAgICAgIGlkOiAnQicsCiAgICAgICAgdGl0bGU6ICfopo/lioPnl4XmgqPnmoTmsrvnmYLoqIjnlas8c3BhbiBjbGFzcz0iZW4tc3ViIj5UcmVhdG1lbnQgUGxhbiBQbGFubmluZzwvc3Bhbj4nLAogICAgICAgIGRlc2M6ICfph53lsI3lt7LmlLbmoYjnl4XmgqPvvIzmjpLlrprmnKrkvobnmoTmsrvnmYLmiJbpl5zmh7foqIjnlasgKFBsYW4p44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPlNjaGVkdWxlIGZ1dHVyZSB0cmVhdG1lbnQgb3IgY2FyZSBwbGFucyBmb3IgZW5yb2xsZWQgcGF0aWVudHMuPC9zcGFuPicsCiAgICAgICAgc3RlcHM6IFsKICAgICAgICAgICflnKjjgIznl4XmgqPnrqHnkIbjgI3liJfooajpu57mk4rku7vkuIDnl4XmgqPpgLLlhaXlhafpoIHjgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+Q2xpY2sgYW55IHBhdGllbnQgaW4gdGhlIGxpc3QgdG8gdmlldyBkZXRhaWxzLjwvc3Bhbj4nLAogICAgICAgICAgJ+WIh+aPm+iHs+OAjFBsYW7jgI3liIbpoIHvvIzpu57mk4rjgIzmlrDlop4gUGxhbuOAjeOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5Td2l0Y2ggdG8gIlBsYW4iIHRhYiBhbmQgY2xpY2sgIkFkZCBQbGFuIi48L3NwYW4+JywKICAgICAgICAgICfnorroqo3ooajllq7lt7Loh6rli5XluLblhaXlsIjmoYjoiIfnl4XmgqPlp5PlkI3jgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+VmVyaWZ5IHByb2plY3QgYW5kIHBhdGllbnQgbmFtZSBhcmUgYXV0by1maWxsZWQuPC9zcGFuPicsCiAgICAgICAgICAn6YG45pOH6aGe5Z6LICjlpoLvvJrmlr3miZPmj5DphpIp77yM5Lim6Kit5a6a6aCQ6KiI5pel5pyf44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPlNlbGVjdCBUeXBlIChlLmcuLCBJbmplY3Rpb24gUmVtaW5kZXIpIGFuZCBzZXQgRXhwZWN0ZWQgRGF0ZS48L3NwYW4+JywKICAgICAgICAgICco6YG455SoKSDli77pgbjjgIzplovllZ/mibnmrKHlu7rnq4vjgI3vvIzoqK3lrprph43opIfpgLHmnJ8gKOWmgu+8muavj+mAseS4gOasoe+8jOmHjeikhyAzIOasoSnjgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+KE9wdGlvbmFsKSBDaGVjayAiQmF0Y2ggQ3JlYXRlIiBhbmQgc2V0IGN5Y2xlIChlLmcuLCBXZWVrbHksIDMgdGltZXMpLjwvc3Bhbj4nLAogICAgICAgICAgJ+m7nuaTiuOAjOeiuuiqjeaWsOWinuOAje+8jOS4pueiuuiqjeWIl+ihqOizh+aWmeabtOaWsOOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5DbGljayAiQ29uZmlybSBBZGQiIGFuZCB2ZXJpZnkgdGhlIGxpc3QgdXBkYXRlcy48L3NwYW4+JwogICAgICAgIF0sCiAgICAgICAgdmlkZW9Vcmw6ICdodHRwczovL3N0b3JhZ2UuZ29vZ2xlYXBpcy5jb20vYWlpaS1zdG9yYWdlLXB1YmxpYy9Kby9wY3BsdXNfZGVtb19iLm1vdicsCiAgICAgICAgd2FybmluZzogJ+ebruWJjeS4suaOpSBEZW1vIOizh+aWmeW6q++8jOm7nuaTiuOAjOeiuuiqjeaWsOWinuOAjeW+jOezu+e1semcgOe0hCAxLTMg56eS5a+r5YWl6LOH5paZ77yM6KuL6ICQ5b+D562J5YCZ77yM5Yu/6YeN6KSH6bue5pOK44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPkNvbm5lY3RlZCB0byBEZW1vIERCLiBQbGVhc2Ugd2FpdCAxLTNzIGFmdGVyIGNvbmZpcm1pbmcuPC9zcGFuPicKICAgICAgfSwKICAgICAgewogICAgICAgIGlkOiAnQycsCiAgICAgICAgdGl0bGU6ICdQbGFuIOeahOaOkueoi+iIh+Wft+ihjDxzcGFuIGNsYXNzPSJlbi1zdWIiPlBsYW4gU2NoZWR1bGluZyAmIEV4ZWN1dGlvbjwvc3Bhbj4nLAogICAgICAgIGRlc2M6ICflsIfopo/lioPlpb3nmoToqIjnlasgKFBsYW4pIOWvpumam+WuieaOkuWIsOihjOS6i+abhiAoU2NoZWR1bGUpIOS4iuOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5Bc3NpZ24gcGxhbm5lZCBpdGVtcyB0byB0aGUgYWN0dWFsIFNjaGVkdWxlLjwvc3Bhbj4nLAogICAgICAgIHN0ZXBzOiBbCiAgICAgICAgICAn6bue5pOK5bem5YG06YG45Zau44CM5bel5L2c57i96Ka944CN44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPkNsaWNrICJXb3JrIE92ZXJ2aWV3IiBvbiB0aGUgbGVmdCBtZW51Ljwvc3Bhbj4nLAogICAgICAgICAgJ+WcqCBQbGFuIOWIhumggeaJvuWIsOeLgOaFi+eCuuOAjOW3suaOkuWumuOAjeeahOmgheebruOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5GaW5kIGl0ZW1zIHdpdGggc3RhdHVzICJTY2hlZHVsZWQiIGluIHRoZSBQbGFuIHRhYi48L3NwYW4+JywKICAgICAgICAgICfpu57mk4rlj7PlgbTmk43kvZzmrITnmoTjgIzml6Xmm4blnJbnpLogKOWuieaOkuihjOeoiynjgI3jgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+Q2xpY2sgdGhlICJDYWxlbmRhciBJY29uIiAoU2NoZWR1bGUpIGluIHRoZSBhY3Rpb24gY29sdW1uLjwvc3Bhbj4nLAogICAgICAgICAgJ+eiuuiqjeiHquWLleW4tuWFpeeahOizh+ioiu+8jOioreWumuOAjOaZguauteOAjSjkuIrljYgv5LiL5Y2IKSDoiIfjgIzotbfoqJbmmYLplpPjgI3jgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+Q2hlY2sgaW5mbywgc2V0ICJTZXNzaW9uIiAoQU0vUE0pIGFuZCAiU3RhcnQvRW5kIFRpbWUiLjwvc3Bhbj4nLAogICAgICAgICAgJyjoi6XngrroqKroppYpIOmBuOaTh+ioquimluaWueW8jyAo6Z2i5bCN6Z2iL+mbu+ipsSnjgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+KElmIFZpc2l0KSBTZWxlY3QgbWV0aG9kIChJbi1wZXJzb24vUGhvbmUpLjwvc3Bhbj4nLAogICAgICAgICAgJ+m7nuaTiuOAjOaWsOWinuiHs+ePreihqOOAjeOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5DbGljayAiQWRkIHRvIFNjaGVkdWxlIi48L3NwYW4+JwogICAgICAgIF0sCiAgICAgICAgdmlkZW9Vcmw6ICdodHRwczovL3N0b3JhZ2UuZ29vZ2xlYXBpcy5jb20vYWlpaS1zdG9yYWdlLXB1YmxpYy9Kby9wY3BsdXNfZGVtb19jLm1vdicsCiAgICAgICAgd2FybmluZzogJ+ebruWJjeS4suaOpSBEZW1vIOizh+aWmeW6q++8jOm7nuaTiuOAjOaWsOWinuiHs+ePreihqOOAjeW+jOezu+e1semcgOe0hCAxLTMg56eS5a+r5YWl6LOH5paZ77yM6KuL6ICQ5b+D562J5YCZ77yM5Yu/6YeN6KSH6bue5pOK44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPkNvbm5lY3RlZCB0byBEZW1vIERCLiBQbGVhc2Ugd2FpdCAxLTNzIGFmdGVyIGFkZGluZyB0byBzY2hlZHVsZS48L3NwYW4+JwogICAgICB9LAogICAgICB7CiAgICAgICAgaWQ6ICdEJywKICAgICAgICB0aXRsZTogJ+afpeeci+W3peS9nOe4veimveiIh+ihjOeoizxzcGFuIGNsYXNzPSJlbi1zdWIiPk92ZXJ2aWV3ICYgU2NoZWR1bGUgQ2hlY2s8L3NwYW4+JywKICAgICAgICBkZXNjOiAn56K66KqNIERhc2hib2FyZCDos4foqIroiIfpmrHnorzlip/og73jgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+Q2hlY2sgRGFzaGJvYXJkIGluZm8gYW5kIERhdGEgTWFza2luZyBmZWF0dXJlLjwvc3Bhbj4nLAogICAgICAgIHN0ZXBzOiBbCiAgICAgICAgICAn6bue5pOK5bem5YG06YG45Zau44CMRGFzaGJvYXJk44CN44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPkNsaWNrICJEYXNoYm9hcmQiIG9uIHRoZSBsZWZ0IG1lbnUuPC9zcGFuPicsCiAgICAgICAgICAn5qqi6KaW44CM5LuK5pel6KGM56iL44CN5YiG6aCB77yM56K66KqN5Ymb5omN5a6J5o6S55qE6KGM56iL5piv5ZCm5Ye654++44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPkNoZWNrICJUb2RheVwncyBTY2hlZHVsZSIgdG8gc2VlIGlmIHRoZSBpdGVtIGFwcGVhcnMuPC9zcGFuPicsCiAgICAgICAgICAn6bue5pOK5Y+z5LiK6KeS6ZaL6Zec44CM6aGv56S65a6M5pW05aeT5ZCN44CN77yM5ris6Kmm55eF5oKj5aeT5ZCN55qE6Zqx56K8L+mhr+ekuuWIh+aPm+OAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5Ub2dnbGUgIlNob3cgRnVsbCBOYW1lIiB0byB0ZXN0IG1hc2tpbmcvdW5tYXNraW5nLjwvc3Bhbj4nLAogICAgICAgICAgJ+m7nuaTiuW3puWBtOmBuOWWruOAjOW3peS9nOe4veimveOAjeOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5DbGljayAiV29yayBPdmVydmlldyIgb24gdGhlIGxlZnQgbWVudS48L3NwYW4+JywKICAgICAgICAgICfliIfmj5vkuIrmlrnliIbpoIEgKFBsYW4gLyBOb3RlIC8gRGFpbHkgTG9nKe+8jOeiuuiqjeWDhemhr+ekuuiHquW3seiyoOiyrOeahOizh+aWmeOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5Td2l0Y2ggdGFicyAoUGxhbiAvIE5vdGUgLyBEYWlseSBMb2cpIHRvIHNlZSBvbmx5IHlvdXIgZGF0YS48L3NwYW4+JwogICAgICAgIF0sCiAgICAgICAgdmlkZW9Vcmw6ICdodHRwczovL3N0b3JhZ2UuZ29vZ2xlYXBpcy5jb20vYWlpaS1zdG9yYWdlLXB1YmxpYy9Kby9wY3BsdXNfZGVtb19kLm1vdicKICAgICAgfSwKICAgICAgewogICAgICAgIGlkOiAnRScsCiAgICAgICAgdGl0bGU6ICfln7fooYzmnI3li5noqJjpjIQgKOaJk+WNoSk8c3BhbiBjbGFzcz0iZW4tc3ViIj5TZXJ2aWNlIFJlY29yZCAoQ2hlY2staW4pPC9zcGFuPicsCiAgICAgICAgZGVzYzogJ+WujOaIkOihjOeoi+W+jO+8jOWhq+Wvq+acjeWLmee0gOmMhOS4pue1kOahiOOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5GaWxsIGluIHNlcnZpY2UgcmVjb3JkIGFuZCBjbG9zZSB0aGUgY2FzZSBhZnRlciBjb21wbGV0aW9uLjwvc3Bhbj4nLAogICAgICAgIHN0ZXBzOiBbCiAgICAgICAgICAn5Zue5Yiw44CMRGFzaGJvYXJk44CN6aaW6aCB55qE44CM5LuK5pel6KGM56iL44CN44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPkdvIGJhY2sgdG8gIlRvZGF5XCdzIFNjaGVkdWxlIiBvbiBEYXNoYm9hcmQuPC9zcGFuPicsCiAgICAgICAgICAn5om+5Yiw5LiA5YCL44CM6aeQ6Ki65pyN5YuZ44CN5oiW44CM6Kiq6KaW44CN6aGe5Z6L55qE6KGM56iL44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPkZpbmQgYSAiQ2xpbmljIFNlcnZpY2UiIG9yICJWaXNpdCIgc2NoZWR1bGUgaXRlbS48L3NwYW4+JywKICAgICAgICAgICfpu57mk4rjgIzmnI3li5nntIDpjITjgI3mjInpiJUgKOWDheeVtuaXpeihjOeoi+WPr+imiynjgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+Q2xpY2sgIlNlcnZpY2UgUmVjb3JkIiBidXR0b24gKE9ubHkgdmlzaWJsZSBmb3IgdG9kYXkpLjwvc3Bhbj4nLAogICAgICAgICAgJ+Whq+Wvq+Wvpumam+i1t+ioluaZgumWk+OAgeWLvumBuOacjeWLmeWFp+WuueOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5GaWxsIGFjdHVhbCBTdGFydC9FbmQgdGltZSBhbmQgY2hlY2sgc2VydmljZSBjb250ZW50Ljwvc3Bhbj4nLAogICAgICAgICAgJ+azqOaEj++8muiLpeaciemXnOiBryBQbGFu77yM56K66KqN5LiL5pa55Ye654++57ag6Imy5Y2A5aGK44CM5LiA5L2157WQ5qGI6Zec6IGvIFBsYW7jgI3jgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+Tm90ZTogSWYgbGlua2VkIHRvIGEgUGxhbiwgZW5zdXJlICJDbG9zZSBMaW5rZWQgUGxhbiIgYXBwZWFycyBncmVlbi48L3NwYW4+JywKICAgICAgICAgICfpu57mk4rjgIzlhLLlrZjntIDpjITjgI3vvIznorroqo3ni4DmhYvorormm7TngrrjgIzlt7LmnI3li5nntIDpjITjgI3jgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+Q2xpY2sgIlNhdmUgUmVjb3JkIiBhbmQgdmVyaWZ5IHN0YXR1cyBjaGFuZ2VzIHRvICJSZWNvcmRlZCIuPC9zcGFuPicKICAgICAgICBdLAogICAgICAgIHZpZGVvVXJsOiAnaHR0cHM6Ly9zdG9yYWdlLmdvb2dsZWFwaXMuY29tL2FpaWktc3RvcmFnZS1wdWJsaWMvSm8vcGNwbHVzX2RlbW9fZS5tb3YnLAogICAgICAgIHdhcm5pbmc6ICfnm67liY3kuLLmjqUgRGVtbyDos4fmlpnluqvvvIzpu57mk4rjgIzlhLLlrZjntIDpjITjgI3lvozns7vntbHpnIDntIQgMS0zIOenkuiZleeQhuizh+aWmeabtOaWsO+8jOiri+iAkOW/g+etieWAme+8jOWLv+mHjeikh+m7nuaTiuOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5Db25uZWN0ZWQgdG8gRGVtbyBEQi4gUGxlYXNlIHdhaXQgMS0zcyBhZnRlciBzYXZpbmcuPC9zcGFuPicKICAgICAgfSwKICAgICAgewogICAgICAgIGlkOiAnRicsCiAgICAgICAgdGl0bGU6ICfln7fooYzmnKrliLDoqLrmnI3li5noqJjpjIQ8c3BhbiBjbGFzcz0iZW4tc3ViIj5NaXNzZWQgVmlzaXQgUmVjb3JkPC9zcGFuPicsCiAgICAgICAgZGVzYzogJ+eVtueXheaCo+eIvee0hOaIluihjOeoi+WPlua2iOaZgueahOe0gOmMhOa1geeoi+OAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5Qcm9jZXNzIGZvciBuby1zaG93cyBvciBjYW5jZWxsZWQgc2NoZWR1bGVzLjwvc3Bhbj4nLAogICAgICAgIHN0ZXBzOiBbCiAgICAgICAgICAn5Zyo44CMRGFzaGJvYXJk44CN5LuK5pel6KGM56iL5Lit6YG45pOH5LiA5YCL5bCa5pyq5Z+36KGM55qE6KGM56iL44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPlNlbGVjdCBhIHBlbmRpbmcgc2NoZWR1bGUgaW4gIlRvZGF5XCdzIFNjaGVkdWxlIi48L3NwYW4+JywKICAgICAgICAgICfpu57mk4rjgIzmnKrliLDoqLrmnI3li5njgI3mjInpiJXjgII8YnI+PHNwYW4gY2xhc3M9ImVuLXN1YiI+Q2xpY2sgIk1pc3NlZCBWaXNpdCIgYnV0dG9uLjwvc3Bhbj4nLAogICAgICAgICAgJ+S4i+aLiemBuOaTh+WOn+WboCAo5aaC77ya55eF5oKj5ouS57WV44CB6Yar5bir5LyR6Ki6KeOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5TZWxlY3QgcmVhc29uIChlLmcuLCBQYXRpZW50IFJlZnVzZWQsIERvY3RvciBPZmYpLjwvc3Bhbj4nLAogICAgICAgICAgJ+Whq+Wvq+ijnOWFheiqquaYjuOAgjxicj48c3BhbiBjbGFzcz0iZW4tc3ViIj5GaWxsIGluIHN1cHBsZW1lbnRhcnkgbm90ZXMuPC9zcGFuPicsCiAgICAgICAgICAn6bue5pOK44CM56K66KqN5Zue5aCx44CN77yM56K66KqN6Kmy6KGM56iL54uA5oWL6K6K5pu054K644CM5pyq5Yiw6Ki65pyN5YuZ44CNKOeBsOiJsi/lpJbmoYYp44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPkNsaWNrICJDb25maXJtIFJlcG9ydCIgYW5kIHZlcmlmeSBzdGF0dXMgY2hhbmdlcyB0byAiTWlzc2VkIFZpc2l0Ii48L3NwYW4+JwogICAgICAgIF0sCiAgICAgICAgdmlkZW9Vcmw6ICdodHRwczovL3N0b3JhZ2UuZ29vZ2xlYXBpcy5jb20vYWlpaS1zdG9yYWdlLXB1YmxpYy9Kby9wY3BsdXNfZGVtb19mLm1vdicsCiAgICAgICAgd2FybmluZzogJ+ebruWJjeS4suaOpSBEZW1vIOizh+aWmeW6q++8jOm7nuaTiuOAjOeiuuiqjeWbnuWgseOAjeW+jOezu+e1semcgOe0hCAxLTMg56eS6JmV55CG6LOH5paZ5pu05paw77yM6KuL6ICQ5b+D562J5YCZ77yM5Yu/6YeN6KSH6bue5pOK44CCPGJyPjxzcGFuIGNsYXNzPSJlbi1zdWIiPkNvbm5lY3RlZCB0byBEZW1vIERCLiBQbGVhc2Ugd2FpdCAxLTNzIGFmdGVyIGNvbmZpcm1pbmcuPC9zcGFuPicKICAgICAgfQogICAgXTsKCiAgICAvLyAtLS0gTG9naWM6IOmggemdouWIh+aPm+iIh+WIneWni+WMliAtLS0KCiAgICAvLyAxLiDliJ3lp4vljJYKICAgIGRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ0RPTUNvbnRlbnRMb2FkZWQnLCAoKSA9PiB7CiAgICAgIGluaXRTY2VuYXJpb01lbnUoKTsKICAgICAgbG9hZFNjZW5hcmlvKDApOyAvLyDpoJDoqK3ovInlhaXnrKzkuIDlgIvmg4XlooMKICAgIH0pOwoKICAgIC8vIDIuIOWIh+aPm+S4u+WIhumggSAo6Kqq5piOIHZzIOaDheWigykKICAgIC8vIOS/ruato++8muaOpeaUtiBidG5FbGVtZW50IOWPg+aVuO+8jOebtOaOpeaTjeS9nOipsuWFg+e0oAogICAgZnVuY3Rpb24gc3dpdGNoTWFpblRhYih0YWJOYW1lLCBidG5FbGVtZW50KSB7CiAgICAgIC8vIOenu+mZpOaJgOacieaMiemIleeahCBhY3RpdmUg5qij5byPCiAgICAgIGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoJy5uYXYtYnRuJykuZm9yRWFjaChidG4gPT4gYnRuLmNsYXNzTGlzdC5yZW1vdmUoJ2FjdGl2ZScpKTsKICAgICAgCiAgICAgIC8vIOWwh+m7nuaTiueahOaMiemIleioreeCuiBhY3RpdmUgKOWmguaenOacieeahOipsSkKICAgICAgaWYgKGJ0bkVsZW1lbnQpIHsKICAgICAgICBidG5FbGVtZW50LmNsYXNzTGlzdC5hZGQoJ2FjdGl2ZScpOwogICAgICB9CgogICAgICAvLyDliIfmj5vlhaflrrnpoa/npLoKICAgICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3RhYi1pbnN0cnVjdGlvbnMnKS5jbGFzc0xpc3QuYWRkKCdoaWRkZW4nKTsKICAgICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3RhYi1zY2VuYXJpb3MnKS5jbGFzc0xpc3QuYWRkKCdoaWRkZW4nKTsKICAgICAgCiAgICAgIGNvbnN0IHRhcmdldFRhYiA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCd0YWItJyArIHRhYk5hbWUpOwogICAgICBpZiAodGFyZ2V0VGFiKSB7CiAgICAgICAgdGFyZ2V0VGFiLmNsYXNzTGlzdC5yZW1vdmUoJ2hpZGRlbicpOwogICAgICB9CiAgICB9CgogICAgLy8gMy4g5Yid5aeL5YyW5oOF5aKD6YG45ZauCiAgICBmdW5jdGlvbiBpbml0U2NlbmFyaW9NZW51KCkgewogICAgICBjb25zdCBtZW51Q29udGFpbmVyID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3NjZW5hcmlvLW1lbnUnKTsKICAgICAgc2NlbmFyaW9zLmZvckVhY2goKHMsIGluZGV4KSA9PiB7CiAgICAgICAgY29uc3QgYnRuID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnZGl2Jyk7CiAgICAgICAgYnRuLmNsYXNzTmFtZSA9ICdzY2VuYXJpby1idG4nOwogICAgICAgIGlmKGluZGV4ID09PSAwKSBidG4uY2xhc3NMaXN0LmFkZCgnYWN0aXZlJyk7CiAgICAgICAgLy8gdGl0bGUgYWxyZWFkeSBpbmNsdWRlcyBlbi1zdWIgc3BhbgogICAgICAgIGJ0bi5pbm5lckhUTUwgPSBgPHNwYW4gY2xhc3M9ImNvZGUiPuaDheWigyAke3MuaWR9PC9zcGFuPiR7cy50aXRsZX1gOwogICAgICAgIGJ0bi5vbmNsaWNrID0gKCkgPT4gewogICAgICAgICAgLy8gUmVtb3ZlIGFjdGl2ZSBjbGFzcyBmcm9tIGFsbAogICAgICAgICAgZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgnLnNjZW5hcmlvLWJ0bicpLmZvckVhY2goYiA9PiBiLmNsYXNzTGlzdC5yZW1vdmUoJ2FjdGl2ZScpKTsKICAgICAgICAgIC8vIEFkZCB0byBjdXJyZW50CiAgICAgICAgICBidG4uY2xhc3NMaXN0LmFkZCgnYWN0aXZlJyk7CiAgICAgICAgICAvLyBMb2FkIGNvbnRlbnQKICAgICAgICAgIGxvYWRTY2VuYXJpbyhpbmRleCk7CiAgICAgICAgfTsKICAgICAgICBtZW51Q29udGFpbmVyLmFwcGVuZENoaWxkKGJ0bik7CiAgICAgIH0pOwogICAgfQoKICAgIC8vIDQuIOi8ieWFpeWWruS4gOaDheWig+WFp+WuuQogICAgZnVuY3Rpb24gbG9hZFNjZW5hcmlvKGluZGV4KSB7CiAgICAgIGNvbnN0IHMgPSBzY2VuYXJpb3NbaW5kZXhdOwogICAgICBjb25zdCBjb250YWluZXIgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc2NlbmFyaW8tY29udGVudCcpOwogICAgICAKICAgICAgLy8g55Sf5oiQ5q2l6amf5YiX6KGoIEhUTUwKICAgICAgY29uc3Qgc3RlcHNIdG1sID0gcy5zdGVwcy5tYXAoc3RlcCA9PiBgPGxpPiR7c3RlcH08L2xpPmApLmpvaW4oJycpOwoKICAgICAgLy8g5b2x54mH5Y2A5aGK6YKP6LyvCiAgICAgIGxldCB2aWRlb0h0bWwgPSAnJzsKICAgICAgaWYgKHMudmlkZW9VcmwpIHsKICAgICAgICAvLyDliKTmlrfmmK/lkKbngrrnm7TmjqXmqpTmoYjpgKPntZAKICAgICAgICBpZiAocy52aWRlb1VybC5pbmNsdWRlcygnc3RvcmFnZS5nb29nbGVhcGlzLmNvbScpIHx8IHMudmlkZW9VcmwuZW5kc1dpdGgoJy5tcDQnKSB8fCBzLnZpZGVvVXJsLmVuZHNXaXRoKCcubW92JykpIHsKICAgICAgICAgICAgdmlkZW9IdG1sID0gYAogICAgICAgICAgICAgIDx2aWRlbyBjb250cm9scyBhdXRvcGxheSBtdXRlZCBwbGF5c2lubGluZT4KICAgICAgICAgICAgICAgIDxzb3VyY2Ugc3JjPSIke3MudmlkZW9Vcmx9IiB0eXBlPSJ2aWRlby9tcDQiPgogICAgICAgICAgICAgICAgPHNvdXJjZSBzcmM9IiR7cy52aWRlb1VybH0iIHR5cGU9InZpZGVvL3F1aWNrdGltZSI+CiAgICAgICAgICAgICAgICDmgqjnmoTngI/opr3lmajkuI3mlK/mj7TmraTlvbHniYfmqJnnsaTvvIzoq4vlmJfoqabkuIvovInmkq3mlL7vvJo8YSBocmVmPSIke3MudmlkZW9Vcmx9Ij7kuIvovInlvbHniYc8L2E+PGJyPgogICAgICAgICAgICAgICAgPHNwYW4gY2xhc3M9ImVuLXN1YiI+QnJvd3NlciBkb2Vzbid0IHN1cHBvcnQgdmlkZW8gdGFnLiA8YSBocmVmPSIke3MudmlkZW9Vcmx9Ij5Eb3dubG9hZCBWaWRlbzwvYT48L3NwYW4+CiAgICAgICAgICAgICAgPC92aWRlbz5gOwogICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgIC8vIGlmcmFtZQogICAgICAgICAgICB2aWRlb0h0bWwgPSBgCiAgICAgICAgICAgICAgPGlmcmFtZSAKICAgICAgICAgICAgICAgIHNyYz0iJHtzLnZpZGVvVXJsfSIgCiAgICAgICAgICAgICAgICB3aWR0aD0iMTAwJSIgCiAgICAgICAgICAgICAgICBoZWlnaHQ9IjEwMCUiIAogICAgICAgICAgICAgICAgc3R5bGU9ImJvcmRlcjpub25lOyBtaW4taGVpZ2h0OjQwMHB4OyIgCiAgICAgICAgICAgICAgICBhbGxvdz0iYXV0b3BsYXk7IGZ1bGxzY3JlZW4iPgogICAgICAgICAgICAgIDwvaWZyYW1lPmA7CiAgICAgICAgfQogICAgICB9IGVsc2UgewogICAgICAgIC8vIOeEoeW9seeJh+aZgueahOS9lOS9jeespgogICAgICAgIHZpZGVvSHRtbCA9IGAKICAgICAgICAgIDxkaXYgc3R5bGU9InRleHQtYWxpZ246Y2VudGVyOyI+CiAgICAgICAgICAgIDxkaXYgc3R5bGU9ImZvbnQtc2l6ZTozcmVtOyBvcGFjaXR5OjAuNTsgbWFyZ2luLWJvdHRvbToxMHB4OyI+8J+OpTwvZGl2PgogICAgICAgICAgICA8ZGl2PgogICAgICAgICAgICAgIDxzdHJvbmc+5b6F6KOc5LiK6J6i5bmV6YyE5b2xPC9zdHJvbmc+PGJyPgogICAgICAgICAgICAgIDxzcGFuIGNsYXNzPSJlbi1zdWIiPlNjcmVlbiByZWNvcmRpbmcgcGVuZGluZzwvc3Bhbj48YnI+CiAgICAgICAgICAgICAgJHtzLnRpdGxlfQogICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIDwvZGl2PmA7CiAgICAgIH0KCiAgICAgIC8vIOeUn+aIkOitpuiqniBIVE1MICjoi6XmnIkpCiAgICAgIGxldCB3YXJuaW5nSHRtbCA9ICcnOwogICAgICBpZiAocy53YXJuaW5nKSB7CiAgICAgICAgd2FybmluZ0h0bWwgPSBgCiAgICAgICAgICA8ZGl2IGNsYXNzPSJ3YXJuaW5nLWJveCI+CiAgICAgICAgICAgIDxkaXYgc3R5bGU9ImZvbnQtc2l6ZTogMS4ycmVtOyI+4pqg77iPPC9kaXY+CiAgICAgICAgICAgIDxkaXY+CiAgICAgICAgICAgICAgPHN0cm9uZz5EZW1vIOezu+e1seaPkOekuu+8mjwvc3Ryb25nPiR7cy53YXJuaW5nfQogICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIDwvZGl2PmA7CiAgICAgIH0KCiAgICAgIGNvbnRhaW5lci5pbm5lckhUTUwgPSBgCiAgICAgICAgPGRpdiBjbGFzcz0ic2NlbmFyaW8taGVhZGVyIj4KICAgICAgICAgIDxkaXYgc3R5bGU9ImNvbG9yOiB2YXIoLS1hY2NlbnQtdGVhbCk7IGZvbnQtd2VpZ2h0OmJvbGQ7IG1hcmdpbi1ib3R0b206NXB4OyI+5oOF5aKDICR7cy5pZH0gKFNjZW5hcmlvICR7cy5pZH0pPC9kaXY+CiAgICAgICAgICA8aDM+JHtzLnRpdGxlfTwvaDM+CiAgICAgICAgICA8cCBzdHlsZT0iY29sb3I6IzY2NjsiPiR7cy5kZXNjfTwvcD4KICAgICAgICA8L2Rpdj4KICAgICAgICAKICAgICAgICAke3dhcm5pbmdIdG1sfQoKICAgICAgICA8dWwgY2xhc3M9InN0ZXAtbGlzdCI+CiAgICAgICAgICAke3N0ZXBzSHRtbH0KICAgICAgICA8L3VsPgoKICAgICAgICA8ZGl2IGNsYXNzPSJ2aWRlby1jb250YWluZXIiIHN0eWxlPSIke3MudmlkZW9VcmwgPyAnYmFja2dyb3VuZDpibGFjazsnIDogJ2JhY2tncm91bmQ6dmFyKC0taXZvcnkpOyd9Ij4KICAgICAgICAgICR7dmlkZW9IdG1sfQogICAgICAgIDwvZGl2PgogICAgICBgOwogICAgfQogIDwvc2NyaXB0Pgo8L2JvZHk+CjwvaHRtbD4=`;
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxlFcznIZz98m7lkqo8l5_lDenFTNJi-hQSxQEXFkiIo3s5uFOCIcFsjCNjUKDKbqaOZg/exec";
+    const DOC_KEY = "zppc_phase1_testDocument";
 
-    // =========================================================
-
-    const ui = {
-      container: document.getElementById('auth-container'),
-      lock: document.getElementById('lock-ui'),
-      loading: document.getElementById('loading-ui'),
-      title: document.getElementById('page-title'),
-      msg: document.getElementById('auth-msg'),
-      input: document.getElementById('access-code'),
-      btn: document.getElementById('btn-verify'),
-      btnText: document.getElementById('btn-text'),
-      spinner: document.getElementById('btn-spinner')
-    };
-
-    // 1. 頁面載入時：檢查文件是公開還是私密
     window.onload = function() {
-      fetch(`${APPS_SCRIPT_URL}?key=${DOCUMENT_KEY}`)
-        .then(res => res.json())
-        .then(data => {
-          ui.loading.style.display = 'none';
-          if (data.status === 'success') {
-            unlockContent(data.title);
-          } else if (data.status === 'locked') {
-            ui.title.innerText = data.title;
-            document.title = data.title + ' | Aiii.Ai';
-            ui.lock.style.display = 'block';
-          } else {
-            ui.title.innerText = "文件設定錯誤";
-            ui.msg.innerText = "找不到此 Document Key，請確認 Google Sheet 設定。";
-            ui.msg.classList.add('error');
-          }
-        })
-        .catch(err => {
-          console.error("權限檢查失敗:", err);
-          ui.loading.style.display = 'none';
-          ui.title.innerText = "連線失敗";
-          ui.msg.innerText = "無法連接驗證伺服器，請檢查網路或聯繫管理員。";
-          ui.msg.classList.add('error');
-        });
+        fetch(GAS_URL + "?key=" + DOC_KEY)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loading-ui').style.display = 'none';
+                if (data.status === 'success') {
+                    unlockContent(data.title);
+                } else {
+                    document.getElementById('page-title').innerText = data.title;
+                    document.getElementById('lock-ui').style.display = 'block';
+                }
+            });
     };
 
-    // 2. 按下按鈕驗證
     function verifyCode() {
-      const code = ui.input.value.trim();
-      if (!code) {
-        ui.msg.innerText = "請輸入驗證碼";
-        ui.msg.className = "auth-msg error";
-        return;
-      }
-      setLoading(true);
-      
-      fetch(`${APPS_SCRIPT_URL}?key=${DOCUMENT_KEY}&code=${code}`)
-        .then(res => res.json())
-        .then(data => {
-          setLoading(false);
-          if (data.status === 'success') {
-            ui.msg.innerText = "驗證成功！";
-            ui.msg.className = "auth-msg success";
-            setTimeout(() => unlockContent(data.title), 500);
-          } else {
-            ui.msg.innerText = "驗證碼錯誤，請重試";
-            ui.msg.className = "auth-msg error";
-          }
-        })
-        .catch(err => {
-          setLoading(false);
-          console.error("驗證過程發生錯誤:", err);
-
-          ui.msg.innerText = "驗證過程發生錯誤";
-          ui.msg.className = "auth-msg error";
-        });
+        const code = document.getElementById('access-code').value.trim();
+        fetch(GAS_URL + "?key=" + DOC_KEY + "&code=" + code)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    unlockContent(data.title);
+                } else {
+                    document.getElementById('auth-msg').innerText = "驗證碼錯誤";
+                    document.getElementById('auth-msg').classList.add('error');
+                }
+            });
     }
 
-    // 3. 解碼並注入內容 (包含 Script 執行)
     function unlockContent(title) {
-      document.title = title + ' | Aiii.Ai';
-      const appRoot = document.getElementById('app-root');
-      
-      try {
-        // Base64 解碼 (支援中文)
-        const decodedHtml = decodeURIComponent(escape(window.atob(PROTECTED_CONTENT)));
+        document.title = title + ' | Aiii.Ai';
+        const template = document.getElementById('secure-content');
+        const root = document.getElementById('content-root');
+        const clone = document.importNode(template.content, true);
+        root.appendChild(clone);
+        document.getElementById('auth-shell').style.display = 'none';
         
-        // 注入 HTML
-        appRoot.innerHTML = decodedHtml;
-        
-        // 隱藏驗證畫面，顯示內容
-        ui.container.style.display = 'none';
-        appRoot.style.display = 'block'; // 或 'flex'，視您的內容排版
-        document.body.style.background = '#fff'; // 將背景改為白底
-
-        // 【關鍵】手動執行內容中的 Script
-        const scripts = appRoot.getElementsByTagName("script");
+        // 執行注入的 script
+        const scripts = root.getElementsByTagName("script");
         for (let i = 0; i < scripts.length; i++) {
-          eval(scripts[i].innerText);
+            eval(scripts[i].innerText);
         }
-        
-      } catch (e) {
-        console.error("內容解析或 Script 執行失敗:", e);
-        alert('內容解析失敗：請確認 HTML 是否正確轉碼，或內容中的 JavaScript 是否有誤。');
-      }
     }
-
-    function setLoading(isLoading) {
-      ui.btn.disabled = isLoading;
-      ui.spinner.style.display = isLoading ? 'inline-block' : 'none';
-      ui.btnText.innerText = isLoading ? '驗證中...' : '解鎖文件';
-    }
-
-    // 支援 Enter 鍵
-    ui.input.addEventListener("keypress", (e) => { if(e.key === "Enter") verifyCode(); });
-
   </script>
 </body>
 </html>
