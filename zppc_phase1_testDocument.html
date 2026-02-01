@@ -8,7 +8,8 @@
   <style>
     :root { --aiii-blue: #004B85; --aiii-teal: #1796B0; --gradient-bg: linear-gradient(180deg, #4BC6E6 0%, #00639B 100%); }
     body { margin: 0; font-family: 'Roboto', 'Noto Sans TC', sans-serif; background: var(--gradient-bg); height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .auth-box { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; overflow: hidden; }
+    #auth-shell { width: 90%; max-width: 400px; z-index: 9999; }
+    .auth-box { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
     .auth-header { background: var(--aiii-blue); padding: 25px; text-align: center; }
     .auth-header img { height: 40px; }
     .auth-body { padding: 30px; text-align: center; }
@@ -677,17 +678,15 @@
     </script>
   </template>
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxlFcznIZz98m7lkqo8l5_lDenFTNJi-hQSxQEXFkiIo3s5uFOCIcFsjCNjUKDKbqaOZg/exec";
-    const KEY = "zppc_phase1_testDocument.html";
+    const GAS_URL = "https://script.google.com/a/aiii.ai/macros/s/AKfycbxlFcznIZz98m7lkqo8l5_lDenFTNJi-hQSxQEXFkiIo3s5uFOCIcFsjCNjUKDKbqaOZg/exec";
+    const KEY = "zppc_phase1_testDocument";
     function reveal(title) {
         document.title = title + " | Aiii.Ai";
         const root = document.getElementById('content-root');
         root.appendChild(document.importNode(document.getElementById('secure-content').content, true));
         root.style.display = 'block';
         document.getElementById('auth-shell').style.display = 'none';
-        document.body.style.background = '#ffffff';
-        document.body.style.height = 'auto';
-        document.body.style.display = 'block';
+        document.body.style.background = '#ffffff'; document.body.style.height = 'auto'; document.body.style.display = 'block';
         const scripts = root.getElementsByTagName("script");
         for (let i = 0; i < scripts.length; i++) { try { eval(scripts[i].innerText); } catch(e){ console.error(e); } }
     }
